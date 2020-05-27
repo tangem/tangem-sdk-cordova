@@ -1,0 +1,41 @@
+{
+  "_args": [
+    [
+      "cordova-plugin-androidx@1.0.2",
+      "/Users/gbixahue/Workspace/Applications/Tangem/tangem-cordova"
+    ]
+  ],
+  "_from": "cordova-plugin-androidx@1.0.2",
+  "_id": "cordova-plugin-androidx@1.0.2",
+  "_inBundle": false,
+  "_integrity": "sha512-gA0Ugz3xXRndZ5+QV+T2BjigNt5YraC+uDA/gOEM6p4m4ofwqFAPoHA4Q17VIHnRtn9++OYoa1Gi44+l6blGhA==",
+  "_location": "/cordova-plugin-androidx",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "cordova-plugin-androidx@1.0.2",
+    "name": "cordova-plugin-androidx",
+    "escapedName": "cordova-plugin-androidx",
+    "rawSpec": "1.0.2",
+    "saveSpec": null,
+    "fetchSpec": "1.0.2"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/cordova-plugin-androidx/-/cordova-plugin-androidx-1.0.2.tgz",
+  "_spec": "1.0.2",
+  "_where": "/Users/gbixahue/Workspace/Applications/Tangem/tangem-cordova",
+  "author": {
+    "name": "Dave Alden"
+  },
+  "dependencies": {
+    "q": "^1.4.1"
+  },
+  "description": "Cordova/Phonegap plugin to enable AndroidX",
+  "devDependencies": {},
+  "license": "MIT",
+  "name": "cordova-plugin-androidx",
+  "version": "1.0.2"
+}

@@ -1,0 +1,26 @@
+{
+  "name": "tangem-sdk",
+  "version": "0.2.3",
+  "description": "Bridge to Tangem SDK",
+  "cordova": {
+    "id": "tangem-sdk",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Tangem/tangem-sdk-cordova"
+  },
+  "keywords": [
+    "tangem",
+    "sdk",
+    "nfc",
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-ios"
+  ],
+  "author": "Anton Zhilenkov",
+  "license": "Mit"
+}

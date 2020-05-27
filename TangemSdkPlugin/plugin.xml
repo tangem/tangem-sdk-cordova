@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="tangem-sdk" version="0.2.3" xmlns="http://apache.org/cordova/ns/plugins/1.0">
+
+    <name>TangemSdkPlugin</name>
+    <description>Plugin description</description>
+    <author>Anton Zhilenkov</author>
+    <keywords>tangem,sdk,nfc</keywords>
+
+    <js-module name="TangemSdkPlugin" src="www/TangemSdkPlugin.js">
+        <clobbers target="TangemSdk" />
+    </js-module>
+
+
+    <platform name="android">
+        <framework custom="true" src="src/android/plugin-build.gradle" type="gradleReference" />
+
+        <source-file src="src/android/TangemSdkPlugin.java" target-dir="src/tangem_sdk" />
+        <source-file src="src/android/xml/tech_filter.xml" target-dir="src/main/res/xml" />
+
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="TangemSdkPlugin">
+                <param name="android-package" value="tangem_sdk.TangemSdkPlugin" />
+            </feature>
+        </config-file>
+
+        <config-file mode="overwrite" parent="/*" target="AndroidManifest.xml">
+            <uses-feature android:name="android.hardware.nfc" android:required="true" />
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.VIBRATE" />
+            <uses-permission android:name="android.permission.NFC" />
+
+        </config-file>
+
+        <edit-config file="AndroidManifest.xml" mode="overwrite"
+                target="/manifest/application/activity[@android:name='MainActivity']">
+
+            <activity android:name="MainActivity" android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
+        </edit-config>
+
+    </platform>
+
+
+    <platform name="ios">
+        <podspec>
+            <config>
+                <source url="https://github.com/CocoaPods/Specs.git" />
+            </config>
+            <pods use-frameworks="true">
+                <pod name="TangemSdk" spec="~> 2.1.0" />
+            </pods>
+        </podspec>
+        <config-file parent="/*" target="config.xml">
+            <feature name="TangemSdkPlugin">
+                <param name="ios-package" value="TangemSdkPlugin" />
+            </feature>
+        </config-file>
+        <source-file src="src/ios/TangemSdkPlugin.swift" />
+
+
+        <config-file parent="com.apple.developer.nfc.readersession.formats" target="**/Entitlements-Debug.plist">
+            <array>
+                <string>NDEF</string>
+                <string>TAG</string>
+            </array>
+        </config-file>
+        <config-file parent="com.apple.developer.nfc.readersession.formats" target="**/Entitlements-Release.plist">
+            <array>
+                <string>NDEF</string>
+                <string>TAG</string>
+            </array>
+        </config-file>
+
+        <config-file parent="NFCReaderUsageDescription" target="*-Info.plist">
+            <string>To Scan Smart Card</string>
+        </config-file>
+
+        <config-file parent="com.apple.developer.nfc.readersession.iso7816.select-identifiers" target="*-Info.plist">
+            <array>
+                <string>A000000812010208</string>
+                <string>D2760000850101</string>
+            </array>
+        </config-file>
+
+    </platform>
+</plugin>

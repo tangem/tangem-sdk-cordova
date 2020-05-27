@@ -1,0 +1,12 @@
+{
+  "appId": "com.tangem.capacitor",
+  "appName": "tangem-capacitor",
+  "bundledWebRuntime": true,
+  "npmClient": "npm",
+  "webDir": "www",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}
