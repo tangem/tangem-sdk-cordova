@@ -27,6 +27,16 @@ var PluginInterface = {
             name, 'sign', [valuesToExport]);
     },
 
+    verify: function(callback, cid, online, optional) {
+        var valuesToExport = createExportingValues(optional, cid)
+        valuesToExport.online = online;
+
+        exec(
+            function (result) { callback.success(JSON.parse(result)); },
+            function (error) { callback.error(JSON.parse(error)); },
+            name, 'verify', [valuesToExport]);
+    },
+
     readIssuerData: function (callback, cid, optional) {
         var valuesToExport = createExportingValues(optional, cid)
         exec(
@@ -112,6 +122,24 @@ var PluginInterface = {
             function (result) { callback.success(JSON.parse(result)); },
             function (error) { callback.error(JSON.parse(error)); },
             name, 'purgeWallet', [valuesToExport]);
+    },
+
+    changePin1: function (callback, cid, pinCode, optional) {
+        var valuesToExport = createExportingValues(optional, cid)
+        valuesToExport.pinCode = pinCode
+        exec(
+            function (result) { callback.success(JSON.parse(result)); },
+            function (error) { callback.error(JSON.parse(error)); },
+            name, 'changePin1', [valuesToExport]);
+    },
+
+    changePin2: function (callback, cid, pinCode, optional) {
+        var valuesToExport = createExportingValues(optional, cid)
+        valuesToExport.pinCode = pinCode
+        exec(
+            function (result) { callback.success(JSON.parse(result)); },
+            function (error) { callback.error(JSON.parse(error)); },
+            name, 'changePin2', [valuesToExport]);
     }
 }
 

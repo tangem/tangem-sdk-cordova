@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-  <string name="app_name">tangem-capacitor</string>
-  <string name="title_activity_main">tangem-capacitor</string>
-  <string name="package_name">com.tangem.capacitor</string>
-  <string name="custom_url_scheme">com.tangem.capacitor</string>
-</resources>

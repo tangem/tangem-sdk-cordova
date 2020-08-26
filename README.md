@@ -24,6 +24,7 @@ The Tangem card is a self-custodial hardware wallet for blockchain assets. The m
     - [User data](#user-data)
         - [Write user data](#write-user-data)
         - [Read user data](#read-user-data)
+    - [PIN codes](#pin-codes)    
 
 ## Getting Started
 
@@ -136,6 +137,20 @@ When calling basic methods, there is no need to show the error to the user, sinc
 #### Scan card
 Method `tangemSdk.scanCard()` is needed to obtain information from the Tangem card. Optionally, if the card contains a wallet (private and public key pair), it proves that the wallet owns a private key that corresponds to a public one.
 
+```js
+var cid = "bb03000000000004";
+var callback = {
+  success: function(result) {
+    console.log("result: " + JSON.stringify(result));
+  },
+  error: function(error) {
+    console.log("error: " + JSON.stringify(error));
+  }
+}
+
+TangemSdk.scanCard(callback);
+```
+
 #### Sign
 Method `tangemSdk.sign()` allows you to sign one or multiple hashes. The SIGN command will return a corresponding array of signatures.
 
@@ -146,12 +161,57 @@ Method `tangemSdk.sign()` allows you to sign one or multiple hashes. The SIGN co
 | cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
 | hashes | Array of hashes to be signed by card |
 
+```js
+var cid = "bb03000000000004";
+var callback = {
+  success: function(result) {
+    console.log("result: " + JSON.stringify(result));
+  },
+  error: function(error) {
+    console.log("error: " + JSON.stringify(error));
+  }
+}
+
+TangemSdk.sign(callback, cid, [
+                "44617461207573656420666f722068617368696e67",
+                "4461746120666f7220757365642068617368696e67"
+            ]);
+```
+
 #### Wallet
 ##### Create Wallet
 Method `tangemSdk.createWallet()` will create a new wallet on the card. A key pair `WalletPublicKey` / `WalletPrivateKey` is generated and securely stored in the card.
 
+```js
+var cid = "bb03000000000004";
+var callback = {
+  success: function(result) {
+    console.log("result: " + JSON.stringify(result));
+  },
+  error: function(error) {
+    console.log("error: " + JSON.stringify(error));
+  }
+}
+
+TangemSdk.createWallet(callback, cid);
+```
+
 ##### Purge Wallet
 Method `tangemSdk.purgeWallet()` deletes all wallet data.
+
+```js
+var cid = "bb03000000000004";
+var callback = {
+  success: function(result) {
+    console.log("result: " + JSON.stringify(result));
+  },
+  error: function(error) {
+    console.log("error: " + JSON.stringify(error));
+  }
+}
+
+TangemSdk.purgeWallet(callback, cid);
+```
 
 #### Issuer data
 Card has a special 512-byte memory block to securely store and update information in COS. For example, this mechanism could be employed for enabling off-line validation of the wallet balance and attesting of cards by the issuer (in addition to Tangem’s attestation). The issuer should define the purpose of use, payload, and format of Issuer Data field. Note that Issuer_Data is never changed or parsed by the executable code the Tangem COS.
@@ -170,6 +230,24 @@ Method `tangemSdk.writeIssuerData(cardId: cardId,issuerData: sampleData, issuerD
 | issuerDataSignature | Issuer’s signature of issuerData with `Issuer_Data_PrivateKey` |
 | issuerDataCounter | An optional counter that protect issuer data against replay attack. When flag Protect_Issuer_Data_Against_Replay set in the card configuration then this value is mandatory and must increase on each execution of `writeIssuerData` command.  |
 
+```js
+var cid = "bb03000000000004";
+var callback = {
+  success: function(result) {
+    console.log("result: " + JSON.stringify(result));
+  },
+  error: function(error) {
+    console.log("error: " + JSON.stringify(error));
+  }
+}
+
+TangemSdk.writeIssuerData(callback, cid,
+                "issuerData",
+                "issuerDataSignature",
+                { issuerDataCounter: 1 }
+            );
+```
+
 ##### Write issuer extra data
 If 512 bytes are not enough, you can use method `tangemSdk.writeIssuerExtraData(cardId: cardId, issuerData: sampleData,startingSignature: startSignature,finalizingSignature: finalSig,issuerDataCounter: newCounter)` to save up to 40 kylobytes.
 
@@ -181,11 +259,58 @@ If 512 bytes are not enough, you can use method `tangemSdk.writeIssuerExtraData(
 | finalizingSignature | Issuer’s signature of `SHA256(cardId | issuerData)` or or `SHA256(cardId | issuerData | issuerDataCounter)` with `Issuer_Data_PrivateKey` |
 | issuerDataCounter | An optional counter that protect issuer data against replay attack. When flag Protect_Issuer_Data_Against_Replay set in the card configuration then this value is mandatory and must increase on each execution of `writeIssuerData` command.  |
 
+```js
+var cid = "bb03000000000004";
+var callback = {
+  success: function(result) {
+    console.log("result: " + JSON.stringify(result));
+  },
+  error: function(error) {
+    console.log("error: " + JSON.stringify(error));
+  }
+}
+
+TangemSdk.writeIssuerExtraData(callback, cid,
+                "data",
+                "startingSignature",
+                "finalizingSignature",
+                { issuerDataCounter: 0 }
+            );
+```
+
 ##### Read issuer data
 Method `tangemSdk.readIssuerData()` returns 512-byte Issuer_Data field and its issuer’s signature.
 
+```js
+var cid = "bb03000000000004";
+var callback = {
+  success: function(result) {
+    console.log("result: " + JSON.stringify(result));
+  },
+  error: function(error) {
+    console.log("error: " + JSON.stringify(error));
+  }
+}
+
+TangemSdk.readUserData(callback, cid);
+```
+
 ##### Read issuer extra data
 Method `tangemSdk.readIssuerExtraData()` ruturns Issuer_Extra_Data field.
+
+```js
+var cid = "bb03000000000004";
+var callback = {
+  success: function(result) {
+    console.log("result: " + JSON.stringify(result));
+  },
+  error: function(error) {
+    console.log("error: " + JSON.stringify(error));
+  }
+}
+
+TangemSdk.readIssuerData(callback, cid);
+```
 
 #### User data
 ##### Write user data
@@ -198,5 +323,39 @@ User_Data is never changed or parsed by the executable code the Tangem COS. The 
 | User_Data | User data |
 | User_Counter | Counters, that initial values can be set by App and increased on every signing of new transaction (on SIGN command that calculate new signatures). The App defines purpose of use. For example, this fields may contain blockchain nonce value. |
 
+```js
+var cid = "bb03000000000004";
+var callback = {
+  success: function(result) {
+    console.log("result: " + JSON.stringify(result));
+  },
+  error: function(error) {
+    console.log("error: " + JSON.stringify(error));
+  }
+}
+
+TangemSdk.writeUserProtectedData(callback, cid,
+                "any data", { userProtectedCounter: 0 });
+```
+
 ##### Read user data
 Method `tangemSdk.readUserData()` returns User Data
+
+```js
+var cid = "bb03000000000004";
+var callback = {
+  success: function(result) {
+    console.log("result: " + JSON.stringify(result));
+  },
+  error: function(error) {
+    console.log("error: " + JSON.stringify(error));
+  }
+}
+
+TangemSdk.readIssuerData(callback, cid);
+```
+
+#### Pin codes
+*Access code (PIN1)* restricts access to the whole card. App must submit the correct value of Access code in each command. 
+*Passcode (PIN2)* is required to sign a transaction or to perform some other commands entailing a change of the card state.
+
