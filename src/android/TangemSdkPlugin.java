@@ -2,21 +2,20 @@ package tangem_sdk;
 
 import android.app.Activity;
 import android.content.Context;
-
 import androidx.annotation.Nullable;
-
-import com.tangem.Config;
-import com.tangem.Message;
-import com.tangem.TangemSdk;
-import com.tangem.TangemSdkError;
+import com.squareup.sqldelight.android.AndroidSqliteDriver;
+import com.squareup.sqldelight.db.SqlDriver;
+import com.tangem.*;
+import com.tangem.commands.common.ResponseConverter;
+import com.tangem.common.CardValuesDbStorage;
+import com.tangem.common.CardValuesStorage;
 import com.tangem.common.CompletionResult;
 import com.tangem.common.extensions.StringKt;
 import com.tangem.tangem_sdk_new.DefaultSessionViewDelegate;
 import com.tangem.tangem_sdk_new.TerminalKeysStorage;
-import com.tangem.tangem_sdk_new.converter.ResponseConverter;
 import com.tangem.tangem_sdk_new.extensions.TangemSdkErrorKt;
 import com.tangem.tangem_sdk_new.nfc.NfcManager;
-
+import kotlin.text.StringsKt;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
@@ -48,14 +47,25 @@ public class TangemSdkPlugin extends CordovaPlugin {
         nfcManager = new NfcManager();
         nfcManager.setCurrentActivity(activity);
 
-        DefaultSessionViewDelegate cardManagerDelegate = new DefaultSessionViewDelegate(nfcManager.getReader());
-        cardManagerDelegate.activity = activity;
+        DefaultSessionViewDelegate viewDelegate = new DefaultSessionViewDelegate(nfcManager.getReader());
+        viewDelegate.activity = activity;
 
         Config config = new Config();
         config.setLinkedTerminal(false);
 
-        sdk = new TangemSdk(nfcManager.getReader(), cardManagerDelegate, config);
-        sdk.setTerminalKeysService(new TerminalKeysStorage(activity.getApplication()));
+        SqlDriver driver = new AndroidSqliteDriver(
+                Database.Companion.getSchema(),
+                activity.getApplicationContext(),
+                "cordova_cards.db"
+        );
+        CardValuesStorage valueStorage = new CardValuesDbStorage(driver);
+        sdk = new TangemSdk(
+                nfcManager.getReader(),
+                viewDelegate,
+                config,
+                valueStorage,
+                new TerminalKeysStorage(activity.getApplication())
+        );
         nfcManager.onResume();
     }
 
@@ -91,6 +101,10 @@ public class TangemSdkPlugin extends CordovaPlugin {
             }
             case "sign": {
                 sign(callbackContext, args);
+                return true;
+            }
+            case "verify": {
+                verify(callbackContext, args);
                 return true;
             }
             case "readIssuerData": {
@@ -129,6 +143,14 @@ public class TangemSdkPlugin extends CordovaPlugin {
                 purgeWallet(callbackContext, args);
                 return true;
             }
+            case "changePin1": {
+                changePin1(callbackContext, args);
+                return true;
+            }
+            case "changePin2": {
+                changePin2(callbackContext, args);
+                return true;
+            }
         }
         return false;
     }
@@ -158,6 +180,23 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         handleResult(callbackContext, completionResult);
                         return null;
                     });
+        } catch (Exception ex) {
+            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+        }
+    }
+
+    private void verify(final CallbackContext callbackContext, JSONArray args) {
+        try {
+            JSONObject jsO = (JSONObject) args.get(0);
+            sdk.verify(
+                    FieldParser.cid(jsO),
+                    FieldParser.online(jsO),
+                    FieldParser.message(jsO),
+                    completionResult -> {
+                        handleResult(callbackContext, completionResult);
+                        return null;
+                    });
+
         } catch (Exception ex) {
             callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
         }
@@ -201,6 +240,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.readIssuerExtraData(
                     FieldParser.cid(jsO),
+                    FieldParser.message(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -264,7 +304,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
     private void writeUserProtectedData(CallbackContext callbackContext, JSONArray args) {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
-            sdk.writeProtectedUserData(
+            sdk.writeUserProtectedData(
                     FieldParser.cid(jsO),
                     FieldParser.userProtectedData(jsO),
                     FieldParser.userProtectedCounter(jsO),
@@ -308,6 +348,38 @@ public class TangemSdkPlugin extends CordovaPlugin {
         }
     }
 
+    private void changePin1(CallbackContext callbackContext, JSONArray args) {
+        try {
+            JSONObject jsO = (JSONObject) args.get(0);
+            sdk.changePin1(
+                    FieldParser.cid(jsO),
+                    FieldParser.pinCode(jsO),
+                    FieldParser.message(jsO),
+                    completionResult -> {
+                        handleResult(callbackContext, completionResult);
+                        return null;
+                    });
+        } catch (Exception ex) {
+            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+        }
+    }
+
+    private void changePin2(CallbackContext callbackContext, JSONArray args) {
+        try {
+            JSONObject jsO = (JSONObject) args.get(0);
+            sdk.changePin2(
+                    FieldParser.cid(jsO),
+                    FieldParser.pinCode(jsO),
+                    FieldParser.message(jsO),
+                    completionResult -> {
+                        handleResult(callbackContext, completionResult);
+                        return null;
+                    });
+        } catch (Exception ex) {
+            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+        }
+    }
+
     private void handleResult(CallbackContext callbackContext, CompletionResult completionResult) {
         if (completionResult instanceof CompletionResult.Success) {
             CompletionResult.Success cardResult = (CompletionResult.Success) completionResult;
@@ -322,12 +394,17 @@ public class TangemSdkPlugin extends CordovaPlugin {
         return new PluginError(9999, ex.toString());
     }
 
-    private PluginError createTangemSdkError(TangemSdkError error) {
+    private PluginError createTangemSdkError(TangemError error) {
         int code = error.getCode();
         Context context = wActivityContext.get();
         if (context == null) return new PluginError(code, Integer.toString(code));
 
-        return new PluginError(code, context.getString(TangemSdkErrorKt.localizedDescription(error)));
+        if (error instanceof TangemSdkError) {
+            TangemSdkError sdkError = ((TangemSdkError) error);
+            return new PluginError(code, context.getString(TangemSdkErrorKt.localizedDescription(sdkError)));
+        } else {
+            return new PluginError(code, error.getCustomMessage());
+        }
     }
 
     private static class PluginError {
@@ -357,6 +434,17 @@ public class TangemSdkPlugin extends CordovaPlugin {
 
         public static String cid(JSONObject jsO) throws JSONException {
             return ((String) jsO.get("cid"));
+        }
+
+        public static Boolean online(JSONObject jsO) throws JSONException {
+            return ((Boolean) jsO.getBoolean("online"));
+        }
+
+        public static byte[] pinCode(JSONObject jsO) {
+            Object pinRaw = jsO.opt("pinCode");
+            if (pinRaw == null || !(pinRaw instanceof String)) return  null;
+
+            return StringKt.calculateSha256(((String) pinRaw));
         }
 
         public static byte[][] hashes(JSONObject jsO) throws JSONException {

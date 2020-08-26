@@ -31,6 +31,7 @@ var app = {
 
         document.getElementById("btn_scanCard").addEventListener("click", onScan);
         document.getElementById("btn_sign").addEventListener("click", onSign);
+        document.getElementById("btn_verify").addEventListener("click", onVerify);
         document.getElementById("btn_read_issuer_data").addEventListener("click", onReadIssuerData);
         document.getElementById("btn_write_issuer_data").addEventListener("click", onWriteIssuerData);
         document.getElementById("btn_read_issuer_extra_data").addEventListener("click", onReadIssuerExtraData);
@@ -40,8 +41,10 @@ var app = {
         document.getElementById("btn_write_user_protected_data").addEventListener("click", onWriteUserProtectedData);
         document.getElementById("btn_create_wallet").addEventListener("click", onCreateWallet);
         document.getElementById("btn_purge_wallet").addEventListener("click", onPurgeWallet);
-        
-        var cid = "bb03000000000004";
+        document.getElementById("btn_change_pin1").addEventListener("click", onChangePin1);
+        document.getElementById("btn_change_pin2").addEventListener("click", onChangePin2);
+
+        var cid = "BB03000000000004";
 
         var callback = {
             success: function(result) {
@@ -61,6 +64,10 @@ var app = {
                 "44617461207573656420666f722068617368696e67",
                 "4461746120666f7220757365642068617368696e67"
             ]);
+        }
+
+        function onVerify(){
+            TangemSdk.verify(callback, cid, true);
         }
 
         function onReadIssuerData() {
@@ -113,6 +120,14 @@ var app = {
         
         function onPurgeWallet() {
             TangemSdk.purgeWallet(callback, cid);
+        }
+
+        function onChangePin1() {
+            TangemSdk.changePin1(callback, cid, "1234");
+        }
+
+        function onChangePin2() {
+            TangemSdk.changePin2(callback, cid, "4321");
         }
     },
 

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="tangem-sdk" version="0.2.4" xmlns="http://apache.org/cordova/ns/plugins/1.0">
+<plugin id="tangem-sdk" version="0.3.0" xmlns="http://apache.org/cordova/ns/plugins/1.0">
 
     <name>TangemSdkPlugin</name>
     <description>Plugin description</description>
@@ -46,7 +46,7 @@
                 <source url="https://github.com/CocoaPods/Specs.git" />
             </config>
             <pods use-frameworks="true">
-                <pod name="TangemSdk" spec="~> 2.1.0" />
+                <pod name="TangemSdk" spec="~> 2.2.0" />
             </pods>
         </podspec>
         <config-file parent="/*" target="config.xml">

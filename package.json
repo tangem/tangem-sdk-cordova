@@ -1,6 +1,6 @@
 {
   "name": "tangem-sdk",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "Bridge to Tangem SDK",
   "cordova": {
     "id": "tangem-sdk",
