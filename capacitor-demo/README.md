@@ -1,16 +1,21 @@
-## Created with Capacitor Create
-
-This app was created using the `npx @capacitor/cli create` command, and comes with a very
-minimal shell for building an app.
-
-Note: unless you know what you're doing, we don't recommend using the `create` way of building an app. Instead, you'll
-likely want to create an app using your framework's tooling (such as `create-react-app`), and then *add* capacitor
-to *that* project (using `npx @capacitor/cli init`).
-
 ### Running this example
 
-To run the provided example, can use serve command:
+For installing the `tangem-sdk` plugin - open the terminal with destination folder of capacitor-demo project.
 
+Add a platform to the project:
 ```bash
-npx cap serve
+npx cap add android|ios
+```
+Install the TangemSdk plugin into the project. After installing the plugin follow the instructions suggested by the capacitor
+```bash
+npm install tangem-sdk
+```
+
+Update dependencies and sync your project
+```bash
+npx cap sync
+```
+Open the project in the IDE
+```bash
+npx cap open android|ios
 ```

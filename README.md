@@ -359,3 +359,34 @@ TangemSdk.readIssuerData(callback, cid);
 *Access code (PIN1)* restricts access to the whole card. App must submit the correct value of Access code in each command. 
 *Passcode (PIN2)* is required to sign a transaction or to perform some other commands entailing a change of the card state.
 
+```js
+var cid = "bb03000000000004";
+var callback = {
+  success: function(result) {
+    console.log("result: " + JSON.stringify(result));
+  },
+  error: function(error) {
+    console.log("error: " + JSON.stringify(error));
+  }
+}
+
+TangemSdk.changePin1(callback, cid);
+//TangemSdk.changePin2(callback, cid);
+```
+### Card attestation
+#### Card verification
+This command is a part of Tangem card attestation. In manufacturing, every new Tangem card internally generates a Card Key pair Card Public Key / Card Private Key. The private key is permanently stored in the card memory and is not accessible to external applications via the NFC interface. At the same time, Tangem publishes the list of CID and corresponding Card Public Key values in its card attestation service and/or hands over this list to the Card Issuer.
+
+```js
+var cid = "bb03000000000004";
+var callback = {
+  success: function(result) {
+    console.log("result: " + JSON.stringify(result));
+  },
+  error: function(error) {
+    console.log("error: " + JSON.stringify(error));
+  }
+}
+
+TangemSdk.verify(callback, cid, true);
+```
