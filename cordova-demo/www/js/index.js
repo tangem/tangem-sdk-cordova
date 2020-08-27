@@ -123,11 +123,11 @@ var app = {
         }
 
         function onChangePin1() {
-            TangemSdk.changePin1(callback, cid, "1234");
+            TangemSdk.changePin1(callback, cid);
         }
 
         function onChangePin2() {
-            TangemSdk.changePin2(callback, cid, "4321");
+            TangemSdk.changePin2(callback, cid);
         }
     },
 

@@ -70,7 +70,7 @@ window.customElements.define('capacitor-welcome', class extends HTMLElement {
   connectedCallback() {
     const self = this;
 
-    var cid = "bb03000000000004";
+    var cid = "BB03000000000004";
     var callback = {
         success: function(result) {
             console.log("result: " + JSON.stringify(result));
