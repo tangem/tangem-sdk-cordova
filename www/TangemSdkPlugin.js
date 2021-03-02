@@ -140,6 +140,39 @@ var PluginInterface = {
             function (result) { callback.success(JSON.parse(result)); },
             function (error) { callback.error(JSON.parse(error)); },
             name, 'changePin2', [valuesToExport]);
+    },
+    readFiles: function (callback, optional) {
+        var valuesToExport = createExportingValues(optional)
+        valuesToExport.readPrivateFiles = optional.readPrivateFiles
+        valuesToExport.indices = optional.indices
+        exec(
+            function (result) { callback.success(JSON.parse(result)); },
+            function (error) { callback.error(JSON.parse(error)); },
+            name, 'readFiles', [valuesToExport]);
+    },
+    writeFiles: function (callback, files, optional) {
+        var valuesToExport = createExportingValues(optional)
+        valuesToExport.files = files
+        exec(
+            function (result) { callback.success(JSON.parse(result)); },
+            function (error) { callback.error(JSON.parse(error)); },
+            name, 'writeFiles', [valuesToExport]);
+    },
+    deleteFiles: function (callback, optional) {
+        var valuesToExport = createExportingValues(optional)
+        valuesToExport.indices = optional.indices
+        exec(
+            function (result) { callback.success(JSON.parse(result)); },
+            function (error) { callback.error(JSON.parse(error)); },
+            name, 'deleteFiles', [valuesToExport]);
+    },
+    changeFilesSettings: function (callback, changes, optional) {
+         var valuesToExport = createExportingValues(optional)
+         valuesToExport.changes = changes
+         exec(
+             function (result) { callback.success(JSON.parse(result)); },
+             function (error) { callback.error(JSON.parse(error)); },
+             name, 'changeFilesSettings', [valuesToExport]);
     }
 }
 

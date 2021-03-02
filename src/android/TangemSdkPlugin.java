@@ -5,8 +5,17 @@ import android.content.Context;
 import androidx.annotation.Nullable;
 import com.squareup.sqldelight.android.AndroidSqliteDriver;
 import com.squareup.sqldelight.db.SqlDriver;
-import com.tangem.*;
+import com.tangem.Config;
+import com.tangem.Database;
+import com.tangem.Message;
+import com.tangem.TangemError;
+import com.tangem.TangemSdk;
+import com.tangem.TangemSdkError;
 import com.tangem.commands.common.ResponseConverter;
+import com.tangem.commands.file.FileData;
+import com.tangem.commands.file.FileDataSignature;
+import com.tangem.commands.file.FileSettings;
+import com.tangem.commands.file.FileSettingsChange;
 import com.tangem.common.CardValuesDbStorage;
 import com.tangem.common.CardValuesStorage;
 import com.tangem.common.CompletionResult;
@@ -15,7 +24,6 @@ import com.tangem.tangem_sdk_new.DefaultSessionViewDelegate;
 import com.tangem.tangem_sdk_new.TerminalKeysStorage;
 import com.tangem.tangem_sdk_new.extensions.TangemSdkErrorKt;
 import com.tangem.tangem_sdk_new.nfc.NfcManager;
-import kotlin.text.StringsKt;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
@@ -23,8 +31,12 @@ import org.apache.cordova.CordovaWebView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.tangem.commands.file.FileData.DataProtectedByPasscode;
+import static com.tangem.commands.file.FileData.DataProtectedBySignature;
 
 /**
  * This class echoes a string called from JavaScript.
@@ -47,7 +59,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
         nfcManager = new NfcManager();
         nfcManager.setCurrentActivity(activity);
 
-        DefaultSessionViewDelegate viewDelegate = new DefaultSessionViewDelegate(nfcManager.getReader());
+        DefaultSessionViewDelegate viewDelegate = new DefaultSessionViewDelegate(nfcManager, nfcManager.getReader());
         viewDelegate.activity = activity;
 
         Config config = new Config();
@@ -66,19 +78,19 @@ public class TangemSdkPlugin extends CordovaPlugin {
                 valueStorage,
                 new TerminalKeysStorage(activity.getApplication())
         );
-        nfcManager.onResume();
+        nfcManager.onStart();
     }
 
     @Override
-    public void onResume(boolean multitasking) {
-        super.onResume(multitasking);
-        if (nfcManager != null) nfcManager.onResume();
+    public void onStart() {
+        super.onStart();
+        if (nfcManager != null) nfcManager.onStart();
     }
 
     @Override
-    public void onPause(boolean multitasking) {
-        if (nfcManager != null) nfcManager.onPause();
-        super.onPause(multitasking);
+    public void onStop() {
+        super.onStop();
+        if (nfcManager != null) nfcManager.onStop();
     }
 
     @Override
@@ -151,6 +163,22 @@ public class TangemSdkPlugin extends CordovaPlugin {
                 changePin2(callbackContext, args);
                 return true;
             }
+            case "readFiles": {
+                readFiles(callbackContext, args);
+                return true;
+            }
+            case "writeFiles": {
+                writeFiles(callbackContext, args);
+                return true;
+            }
+            case "deleteFiles": {
+                deleteFiles(callbackContext, args);
+                return true;
+            }
+            case "changeFilesSettings": {
+                changeFilesSettings(callbackContext, args);
+                return true;
+            }
         }
         return false;
     }
@@ -159,6 +187,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.scanCard(
+                    null,
                     FieldParser.message(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
@@ -174,6 +203,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.sign(
                     FieldParser.hashes(jsO),
+                    null,
                     FieldParser.cid(jsO),
                     FieldParser.message(jsO),
                     completionResult -> {
@@ -322,6 +352,8 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.createWallet(
+                    null,
+                    null,
                     FieldParser.cid(jsO),
                     FieldParser.message(jsO),
                     completionResult -> {
@@ -337,6 +369,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.purgeWallet(
+                    null,
                     FieldParser.cid(jsO),
                     FieldParser.message(jsO),
                     completionResult -> {
@@ -380,6 +413,71 @@ public class TangemSdkPlugin extends CordovaPlugin {
         }
     }
 
+    private void readFiles(CallbackContext callbackContext, JSONArray args) {
+        try {
+            JSONObject jsO = (JSONObject) args.get(0);
+            sdk.readFiles(
+                    ((boolean) jsO.get("readPrivateFiles")),
+                    FieldParser.indices(jsO),
+                    FieldParser.cid(jsO),
+                    FieldParser.message(jsO),
+                    completionResult -> {
+                        handleResult(callbackContext, completionResult);
+                        return null;
+                    });
+        } catch (Exception ex) {
+            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+        }
+    }
+
+    private void writeFiles(CallbackContext callbackContext, JSONArray args) {
+        try {
+            JSONObject jsO = (JSONObject) args.get(0);
+            sdk.writeFiles(
+                    FieldParser.files(jsO),
+                    FieldParser.cid(jsO),
+                    FieldParser.message(jsO),
+                    completionResult -> {
+                        handleResult(callbackContext, completionResult);
+                        return null;
+                    });
+        } catch (Exception ex) {
+            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+        }
+    }
+
+    private void deleteFiles(CallbackContext callbackContext, JSONArray args) {
+        try {
+            JSONObject jsO = (JSONObject) args.get(0);
+            sdk.deleteFiles(
+                    FieldParser.indices(jsO),
+                    FieldParser.cid(jsO),
+                    FieldParser.message(jsO),
+                    completionResult -> {
+                        handleResult(callbackContext, completionResult);
+                        return null;
+                    });
+        } catch (Exception ex) {
+            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+        }
+    }
+
+    private void changeFilesSettings(CallbackContext callbackContext, JSONArray args) {
+        try {
+            JSONObject jsO = (JSONObject) args.get(0);
+            sdk.changeFilesSettings(
+                    FieldParser.changes(jsO),
+                    FieldParser.cid(jsO),
+                    FieldParser.message(jsO),
+                    completionResult -> {
+                        handleResult(callbackContext, completionResult);
+                        return null;
+                    });
+        } catch (Exception ex) {
+            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+        }
+    }
+
     private void handleResult(CallbackContext callbackContext, CompletionResult completionResult) {
         if (completionResult instanceof CompletionResult.Success) {
             CompletionResult.Success cardResult = (CompletionResult.Success) completionResult;
@@ -401,7 +499,8 @@ public class TangemSdkPlugin extends CordovaPlugin {
 
         if (error instanceof TangemSdkError) {
             TangemSdkError sdkError = ((TangemSdkError) error);
-            return new PluginError(code, context.getString(TangemSdkErrorKt.localizedDescription(sdkError)));
+            String message = TangemSdkErrorKt.localizedDescription(sdkError, context);
+            return new PluginError(code, message);
         } else {
             return new PluginError(code, error.getCustomMessage());
         }
@@ -433,6 +532,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
         }
 
         public static String cid(JSONObject jsO) throws JSONException {
+            if (jsO.isNull("cid")) return null;
             return ((String) jsO.get("cid"));
         }
 
@@ -442,7 +542,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
 
         public static byte[] pinCode(JSONObject jsO) {
             Object pinRaw = jsO.opt("pinCode");
-            if (pinRaw == null || !(pinRaw instanceof String)) return  null;
+            if (pinRaw == null || !(pinRaw instanceof String)) return null;
 
             return StringKt.calculateSha256(((String) pinRaw));
         }
@@ -505,6 +605,71 @@ public class TangemSdkPlugin extends CordovaPlugin {
 
         private static byte[] hexToBytes(String hexString) {
             return StringKt.hexToBytes(hexString);
+        }
+
+        public static List<Integer> indices(JSONObject jsO) throws JSONException {
+            if (jsO.isNull("indices")) return null;
+
+            JSONArray jsonArray = jsO.getJSONArray("indices");
+            List<Integer> list = new ArrayList();
+            int len = jsonArray.length();
+            for (int i = 0; i < len; i++) {
+                Object item = jsonArray.get(i);
+                if (item instanceof Integer) list.add(((Integer) item));
+            }
+            return list;
+        }
+
+        public static List<FileData> files(JSONObject jsO) throws JSONException {
+            if (jsO.isNull("files")) return null;
+
+            List<FileData> list = new ArrayList();
+            JSONArray jsonArray = jsO.getJSONArray("files");
+            int len = jsonArray.length();
+            for (int i = 0; i < len; i++) {
+                Object item = jsonArray.get(i);
+                if (!(item instanceof JSONObject)) continue;
+
+                JSONObject itemJso = ((JSONObject) item);
+                byte[] data = fetchHexStringAndConvertToBytes(itemJso, "data");
+                if (itemJso.has("counter") && itemJso.has("signature")) {
+                    // DataProtectedBySignature
+                    int counter = itemJso.getInt("counter");
+                    JSONObject signatureJso = itemJso.getJSONObject("signature");
+                    FileDataSignature signature = new FileDataSignature(
+                            fetchHexStringAndConvertToBytes(signatureJso, "startingSignature"),
+                            fetchHexStringAndConvertToBytes(signatureJso, "finalizingSignature")
+                    );
+                    DataProtectedBySignature dpbs = new DataProtectedBySignature(
+                            data,
+                            counter,
+                            signature,
+                            fetchHexStringAndConvertToBytes(itemJso, "issuerPublicKey")
+                    );
+                    list.add(dpbs);
+                } else {
+                    // DataProtectedByPasscode
+                    list.add(new DataProtectedByPasscode(data));
+                }
+            }
+            return list;
+        }
+
+        public static List<FileSettingsChange> changes(JSONObject jsO) throws JSONException {
+            List<FileSettingsChange> list = new ArrayList();
+            JSONArray jsonArray = jsO.getJSONArray("changes");
+            for (int i = 0; i < jsonArray.length(); i++) {
+                Object item = jsonArray.get(i);
+                if (!(item instanceof JSONObject)) continue;
+
+                JSONObject itemJso = ((JSONObject) item);
+                FileSettingsChange fsc = new FileSettingsChange(
+                        itemJso.getInt("fileIndex"),
+                        FileSettings.Companion.byRawValue(itemJso.getInt("settings"))
+                );
+                list.add(fsc);
+            }
+            return list;
         }
     }
 }
