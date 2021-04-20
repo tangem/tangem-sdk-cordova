@@ -9,9 +9,7 @@ import TangemSdk
     }
     
     @objc(scanCard:) func scanCard(command: CDVInvokedUrlCommand) {
-        sdk.scanCard(onlineVerification: false,
-                     initialMessage: command.params?.getArg(.initialMessage),
-                     pin1: command.params?.getArg(.pin1)) {[weak self] result in
+        sdk.scanCard(initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
             self?.handleResult(result, callbackId: command.callbackId)
         }
     }
@@ -24,7 +22,7 @@ import TangemSdk
         }
         
         sdk.sign(hashes: hexHashes.compactMap({Data(hexString: $0)}),
-                 cardId: params?.getArg(.cid),
+                 cardId: params?.getArg(.cardId),
                  initialMessage: params?.getArg(.initialMessage),
                  pin1: command.params?.getArg(.pin1),
                  pin2: command.params?.getArg(.pin2)) {[weak self] result in
@@ -33,7 +31,7 @@ import TangemSdk
     }
     
     @objc(readIssuerData:) func readIssuerData(command: CDVInvokedUrlCommand) {
-        sdk.readIssuerData(cardId: command.params?.getArg(.cid),
+        sdk.readIssuerData(cardId: command.params?.getArg(.cardId),
                            initialMessage: command.params?.getArg(.initialMessage),
                            pin1: command.params?.getArg(.pin1)) {[weak self] result in
                             self?.handleResult(result, callbackId: command.callbackId)
@@ -42,7 +40,7 @@ import TangemSdk
     
     @objc(writeIssuerData:) func writeIssuerData(command: CDVInvokedUrlCommand) {
         let params = command.params
-        guard let cid: String = params?.getArg(.cid),
+        guard let cardId: String = params?.getArg(.cardId),
             let issuerData: Data = params?.getArg(.issuerData),
             let issuerDataSignature: Data = params?.getArg(.issuerDataSignature)  else {
                 handleMissingArgs(callbackId: command.callbackId)
@@ -50,7 +48,7 @@ import TangemSdk
         }
         
         let issuerDataCounter: Int? = params?.getArg(.issuerDataCounter)
-        sdk.writeIssuerData(cardId: cid,
+        sdk.writeIssuerData(cardId: cardId,
                             issuerData: issuerData,
                             issuerDataSignature: issuerDataSignature,
                             issuerDataCounter: issuerDataCounter,
@@ -70,7 +68,7 @@ import TangemSdk
     
     @objc(writeIssuerExtraData:) func writeIssuerExtraData(command: CDVInvokedUrlCommand) {
         let params = command.params
-        guard let cid: String = params?.getArg(.cid),
+        guard let cardId: String = params?.getArg(.cardId),
             let issuerData: Data = params?.getArg(.issuerData),
             let startingSignature: Data = params?.getArg(.startingSignature),
             let finalizingSignature: Data = params?.getArg(.finalizingSignature) else {
@@ -78,7 +76,7 @@ import TangemSdk
                 return
         }
         
-        sdk.writeIssuerExtraData(cardId: cid,
+        sdk.writeIssuerExtraData(cardId: cardId,
                                  issuerData: issuerData,
                                  startingSignature: startingSignature,
                                  finalizingSignature: finalizingSignature,
@@ -90,7 +88,7 @@ import TangemSdk
     }
     
     @objc(readUserData:) func readUserData(command: CDVInvokedUrlCommand) {
-        sdk.readUserData(cardId: command.params?.getArg(.cid),
+        sdk.readUserData(cardId: command.params?.getArg(.cardId),
                          initialMessage: command.params?.getArg(.initialMessage),
                          pin1: command.params?.getArg(.pin1)) {[weak self] result in
                             self?.handleResult(result, callbackId: command.callbackId)
@@ -104,7 +102,7 @@ import TangemSdk
             return
         }
         
-        sdk.writeUserData(cardId: params?.getArg(.cid),
+        sdk.writeUserData(cardId: params?.getArg(.cardId),
                           userData: userData,
                           userCounter: params?.getArg(.userCounter),
                           initialMessage: params?.getArg(.initialMessage),
@@ -115,13 +113,13 @@ import TangemSdk
     
     @objc(writeUserProtectedData:) func writeUserProtectedData(command: CDVInvokedUrlCommand) {
         let params = command.params
-        guard let cid: String = params?.getArg(.cid),
+        guard let cardId: String = params?.getArg(.cardId),
             let userProtectedData: Data = params?.getArg(.userProtectedData) else {
                 handleMissingArgs(callbackId: command.callbackId)
                 return
         }
         
-        sdk.writeUserProtectedData(cardId: cid,
+        sdk.writeUserProtectedData(cardId: cardId,
                                    userProtectedData: userProtectedData,
                                    userProtectedCounter: params?.getArg(.userProtectedCounter),
                                    initialMessage: params?.getArg(.initialMessage),
@@ -131,7 +129,7 @@ import TangemSdk
     }
     
     @objc(createWallet:) func createWallet(command: CDVInvokedUrlCommand) {
-        sdk.createWallet(cardId: command.params?.getArg(.cid),
+        sdk.createWallet(cardId: command.params?.getArg(.cardId),
                          initialMessage: command.params?.getArg(.initialMessage),
                          pin1: command.params?.getArg(.pin1),
                          pin2: command.params?.getArg(.pin2)) {[weak self] result in
@@ -140,7 +138,7 @@ import TangemSdk
     }
     
     @objc(purgeWallet:) func purgeWallet(command: CDVInvokedUrlCommand) {
-        sdk.purgeWallet(cardId: command.params?.getArg(.cid),
+        sdk.purgeWallet(cardId: command.params?.getArg(.cardId),
                         initialMessage: command.params?.getArg(.initialMessage),
                         pin1: command.params?.getArg(.pin1),
                         pin2: command.params?.getArg(.pin2)) {[weak self] result in
@@ -151,7 +149,7 @@ import TangemSdk
     @objc(changePin1:) func changePin1(command: CDVInvokedUrlCommand)  {
         let pin: String? = command.params?.getArg(.pinCode)
         
-        sdk.changePin1(cardId: command.params?.getArg(.cid),
+        sdk.changePin1(cardId: command.params?.getArg(.cardId),
                        pin: pin?.sha256(),
                        initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
                         self?.handleResult(result, callbackId: command.callbackId)
@@ -161,7 +159,7 @@ import TangemSdk
     @objc(changePin2:) func changePin2(command: CDVInvokedUrlCommand) {
         let pin: String? = command.params?.getArg(.pinCode)
         
-        sdk.changePin2(cardId: command.params?.getArg(.cid),
+        sdk.changePin2(cardId: command.params?.getArg(.cardId),
                        pin: pin?.sha256(),
                        initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
                         self?.handleResult(result, callbackId: command.callbackId)
@@ -170,13 +168,13 @@ import TangemSdk
     
     @objc(verify:) func verify(command: CDVInvokedUrlCommand) {
         if let online: Bool = command.params?.getArg(.online) {
-            sdk.verify(cardId: command.params?.getArg(.cid),
+            sdk.verify(cardId: command.params?.getArg(.cardId),
                        online: online,
                        initialMessage: command.params?.getArg(.initialMessage),
                        pin1: command.params?.getArg(.pin1)) { [weak self] result in
                         self?.handleResult(result, callbackId: command.callbackId) }
         } else {
-            sdk.verify(cardId: command.params?.getArg(.cid),
+            sdk.verify(cardId: command.params?.getArg(.cardId),
                        initialMessage: command.params?.getArg(.initialMessage),
                        pin1: command.params?.getArg(.pin1)) { [weak self] result in
                         self?.handleResult(result, callbackId: command.callbackId)
@@ -186,7 +184,7 @@ import TangemSdk
     
     @objc(readFiles:) func readFiles(command: CDVInvokedUrlCommand) {
         let readPrivateFiles: Bool = command.params?.getArg(.readPrivateFiles) ?? false
-        sdk.readFiles(cardId: command.params?.getArg(.cid),
+        sdk.readFiles(cardId: command.params?.getArg(.cardId),
                       initialMessage: command.params?.getArg(.initialMessage),
                       pin1: command.params?.getArg(.pin1),
                       pin2: command.params?.getArg(.pin2),
@@ -201,7 +199,7 @@ import TangemSdk
             return
         }
         
-        sdk.writeFiles(cardId: command.params?.getArg(.cid),
+        sdk.writeFiles(cardId: command.params?.getArg(.cardId),
                        initialMessage: command.params?.getArg(.initialMessage),
                        pin1: command.params?.getArg(.pin1),
                        pin2: command.params?.getArg(.pin2),
@@ -211,7 +209,7 @@ import TangemSdk
     }
     
     @objc(deleteFiles:) func deleteFiles(command: CDVInvokedUrlCommand) {
-        sdk.deleteFiles(cardId: command.params?.getArg(.cid),
+        sdk.deleteFiles(cardId: command.params?.getArg(.cardId),
                         initialMessage: command.params?.getArg(.initialMessage),
                         pin1: command.params?.getArg(.pin1),
                         pin2: command.params?.getArg(.pin2),
@@ -226,7 +224,7 @@ import TangemSdk
             return
         }
         
-        sdk.changeFilesSettings(cardId: command.params?.getArg(.cid),
+        sdk.changeFilesSettings(cardId: command.params?.getArg(.cardId),
                                 initialMessage: command.params?.getArg(.initialMessage),
                                 pin1: command.params?.getArg(.pin1),
                                 pin2: command.params?.getArg(.pin2),
@@ -262,7 +260,7 @@ fileprivate extension CDVInvokedUrlCommand {
 fileprivate enum ArgKey: String {
     case pin1
     case pin2
-    case cid
+    case cardId
     case hashes
     case userCounter
     case userProtectedCounter
