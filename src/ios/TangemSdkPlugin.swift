@@ -29,9 +29,9 @@ import TangemSdk
             switch result {
             case .success(let signResponse):
                 let hexes = signResponse.map { $0.asHexString() }
-                self.handleResult(.success(hexes), callbackId: command.callbackId)
+                self?.handleResult(.success(hexes), callbackId: command.callbackId)
             case .failure(let error):
-                self.handleResult(Result<[String], TangemSdkError>.failure(error), callbackId: command.callbackId)
+                self?.handleResult(Result<[String], TangemSdkError>.failure(error), callbackId: command.callbackId)
             }
         }
     }

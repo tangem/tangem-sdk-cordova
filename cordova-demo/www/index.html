@@ -12,7 +12,7 @@
         <div id="splashScreen">
             <h1>Tangem Cordova</h1>
         </div>
-        <div id="app" style="display:none">
+        <div id="app" style="display:">
             <section>
                 <h2>Scan Card</h2>
                 <form class="request">
@@ -32,9 +32,9 @@
                 <h2>Sign</h2>
                 <form class="request">
                     <label for="hash1">Hash 1</label>
-                    <input type="text" id="hash1"/>
+                    <input type="text" id="hash1" value="44617461207573656420666f722068617368696e67"/>
                     <label for="hash2">Hash 2</label>
-                    <input type="text" id="hash2"/>
+                    <input type="text" id="hash2" value="4461746120666f7220757365642068617368696e67"/>
                     <label for="hash3">Hash 3</label>
                     <input type="text" id="hash3"/>
                     <label for="signWalletPublicKey">Wallet Public Key</label>
@@ -52,7 +52,9 @@
             <section>
                 <h2>Verify</h2>
                 <form class="request">
-
+                    <label>Online
+                        <input type="checkbox" id="onlineVerify" checked value="online">
+                    </label>
                 </form>
                 <form class="response">
                     <label for="taVerify">Response:</label>
@@ -102,9 +104,9 @@
                 <h2>Write issuer data</h2>
                 <form class="request">
                     <label for="IssuerData">Issuer Data</label>
-                    <input type="text" id="IssuerData"/>
+                    <input type="text" id="IssuerData" value="4461746120746f206265207772697474656e206f6e20612063617264206173206973737565722064617461"/>
                     <label for="issuerDataSignature">Issuer Data Signature</label>
-                    <input type="text" id="issuerDataSignature" class="issuerDataSignature"/>
+                    <input type="text" id="issuerDataSignature"/>
                 </form>
                 <form class="response">
                     <label for="taWriteIssuerData">Response:</label>
@@ -129,9 +131,11 @@
                 <h2>Write issuer extra data</h2>
                 <form class="request">
                     <label for="IssuerExtraData">Issuer Extra Data</label>
-                    <input type="text" id="IssuerExtraData"/>
-                    <label for="issuerExtraDataSignature">Issuer Extra Data Signature</label>
-                    <input type="text" id="issuerExtraDataSignature" class="issuerExtraDataSignature"/>
+                    <input type="text" id="IssuerExtraData" value=""/>
+                    <label for="issuerExtraDataStartingSignature">Issuer Extra Data Starting Signature</label>
+                    <input type="text" id="issuerExtraDataStartingSignature" value=""/>
+                    <label for="issuerExtraDataFinalizingSignature">Issuer Extra Data Finalizing Signature</label>
+                    <input type="text" id="issuerExtraDataFinalizingSignature" value=""/>
                 </form>
                 <form class="response">
                     <label for="taWriteIssuerExtraData">Response:</label>
@@ -155,9 +159,9 @@
                 <h2>Write user data</h2>
                 <form class="request">
                     <label for="userData">User Data</label>
-                    <input type="text" id="userData"/>
-                    <label for="userDataSignature">User Data Signature</label>
-                    <input type="text" id="userDataSignature" class="userDataSignature"/>
+                    <input type="text" id="userData" value="44617461207573656420666f722068617368696e67"/>
+                    <label for="userDataCounter">User Data Counter</label>
+                    <input type="number" id="userDataCounter" value="0"/>
                 </form>
                 <form class="response">
                     <label for="taWriteUserData">Response:</label>
@@ -170,9 +174,9 @@
                 <h2>Write user protected data</h2>
                 <form class="request">
                     <label for="userProtectedData">User Protected Data</label>
-                    <input type="text" id="userProtectedData"/>
-                    <label for="userProtectedDataSignature">User Protected Data Signature</label>
-                    <input type="text" id="userProtectedDataSignature" class="userDataSignature"/>
+                    <input type="text" id="userProtectedData" value="44617461207573656420666f722068617368696e67"/>
+                    <label for="userProtectedDataCounter">User Protected Data Counter</label>
+                    <input type="number" id="userProtectedDataCounter" value="0"/>
                 </form>
                 <form class="response">
                     <label for="taWriteUserProtectedData">Response:</label>
@@ -184,7 +188,8 @@
             <section>
                 <h2>Change Pin1</h2>
                 <form class="request">
-
+                    <label for="pin1">Pin 1</label>
+                    <input type="text" id="pin1" value=""/>
                 </form>
                 <form class="response">
                     <label for="taChangePin1">Response:</label>
@@ -196,7 +201,8 @@
             <section>
                 <h2>Change Pin2</h2>
                 <form class="request">
-
+                    <label for="pin2">Pin 2</label>
+                    <input type="text" id="pin2" value=""/>
                 </form>
                 <form class="response">
                     <label for="taChangePin2">Response:</label>
@@ -208,7 +214,9 @@
             <section>
                 <h2>Read files</h2>
                 <form class="request">
-
+                    <label>Read private files
+                        <input type="checkbox" id="ReadPrivateFiles" checked value="read private files">
+                    </label>
                 </form>
                 <form class="response">
                     <label for="taReadFiles">Response:</label>
@@ -232,7 +240,8 @@
             <section>
                 <h2>Delete files</h2>
                 <form class="request">
-
+                    <label for="DeleteFileIndex">Delete file index</label>
+                    <input type="number" id="DeleteFileIndex" value="0"/>
                 </form>
                 <form class="response">
                     <label for="taDeleteFiles">Response:</label>
@@ -242,15 +251,19 @@
             </section>
 
             <section>
-                <h2>Files change settings</h2>
+                <h2>Change files settings</h2>
                 <form class="request">
-
+                    <label for="ChangeFileIndex">Delete file index</label>
+                    <input type="number" id="ChangeFileIndex" value="0"/>
+                    <label>Read private files
+                        <input type="checkbox" id="ChangeFilePrivate" checked value="Private">
+                    </label>
                 </form>
                 <form class="response">
-                    <label for="taFilesChangeSettings">Response:</label>
-                    <textarea id="taFilesChangeSettings"></textarea>
+                    <label for="taChangeFilesSettings">Response:</label>
+                    <textarea id="taChangeFilesSettings"></textarea>
                 </form>
-                <button id="buttonFilesChangeSettings" type="button">Files change settings</button>
+                <button id="buttonChangeFilesSettings" type="button">Files change settings</button>
             </section>
 
         </div>
