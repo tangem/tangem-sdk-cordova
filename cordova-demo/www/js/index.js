@@ -27,56 +27,113 @@ var app = {
     // Bind any cordova events here. Common events are:
     // 'pause', 'resume', etc.
     onDeviceReady: function() {
-        this.receivedEvent('deviceready');
 
-        document.getElementById("btn_scanCard").addEventListener("click", onScan);
-        document.getElementById("btn_sign").addEventListener("click", onSign);
-        document.getElementById("btn_verify").addEventListener("click", onVerify);
-        document.getElementById("btn_read_issuer_data").addEventListener("click", onReadIssuerData);
-        document.getElementById("btn_write_issuer_data").addEventListener("click", onWriteIssuerData);
-        document.getElementById("btn_read_issuer_extra_data").addEventListener("click", onReadIssuerExtraData);
-        document.getElementById("btn_write_issuer_extra_data").addEventListener("click", onWriteIssuerExtraData);
-        document.getElementById("btn_read_user_data").addEventListener("click", onReadUserData);
-        document.getElementById("btn_write_user_data").addEventListener("click", onWriteUserData);
-        document.getElementById("btn_write_user_protected_data").addEventListener("click", onWriteUserProtectedData);
-        document.getElementById("btn_create_wallet").addEventListener("click", onCreateWallet);
-        document.getElementById("btn_purge_wallet").addEventListener("click", onPurgeWallet);
-        document.getElementById("btn_change_pin1").addEventListener("click", onChangePin1);
-        document.getElementById("btn_change_pin2").addEventListener("click", onChangePin2);
+        var TangemSdk = window.TangemSdk;
+        document.getElementById("splashScreen").setAttribute('style', 'display:none;');
+        document.getElementById("app").setAttribute('style', 'display:block;');
 
-        document.getElementById("btn_files_read").addEventListener("click", onFilesRead);
-        document.getElementById("btn_files_write").addEventListener("click", onFilesWrite);
-        document.getElementById("btn_files_delete").addEventListener("click", onFilesDelete);
-        document.getElementById("btn_files_change_settings").addEventListener("click", onFilesChangeSettings);
+        document.getElementById("buttonCreateWallet").addEventListener("click", onCreateWallet);
+        document.getElementById("buttonPurgeWallet").addEventListener("click", onPurgeWallet);
 
-        var cid = "BB03000000000004";
+        document.getElementById("buttonScanCard").addEventListener("click", onScanCard);
+        document.getElementById("buttonSign").addEventListener("click", onSign);
+        document.getElementById("buttonVerify").addEventListener("click", onVerify);
+        document.getElementById("buttonReadIssuerData").addEventListener("click", onReadIssuerData);
+        document.getElementById("buttonWriteIssuerData").addEventListener("click", onWriteIssuerData);
+        document.getElementById("buttonReadIssuerExtraData").addEventListener("click", onReadIssuerExtraData);
+        document.getElementById("buttonWriteIssuerExtraData").addEventListener("click", onWriteIssuerExtraData);
+        document.getElementById("buttonReadUserData").addEventListener("click", onReadUserData);
+        document.getElementById("buttonWriteUserData").addEventListener("click", onWriteUserData);
+        document.getElementById("buttonWriteUserProtectedData").addEventListener("click", onWriteUserProtectedData);
 
-        var callback = {
-            success: function(result) {
-                console.log("result: " + JSON.stringify(result));
-            },
-            error: function(error) {
-                console.log("error: " + JSON.stringify(error));
+        document.getElementById("buttonChangePin1").addEventListener("click", onChangePin1);
+        document.getElementById("buttonChangePin2").addEventListener("click", onChangePin2);
+
+        document.getElementById("buttonFilesRead").addEventListener("click", onFilesRead);
+        document.getElementById("buttonFilesWrite").addEventListener("click", onFilesWrite);
+        document.getElementById("buttonFilesDelete").addEventListener("click", onFilesDelete);
+        document.getElementById("buttonFilesChangeSettings").addEventListener("click", onFilesChangeSettings);
+
+
+
+        function textareaSetValue(textareaId, result, error) {
+            var ta = document.getElementById(textareaId);
+            if (ta) {
+                ta.innerText = JSON.stringify(error||result, null, 2);
             }
         }
 
-        function onScan() {
-            TangemSdk.scanCard(callback);
+        function setByClass(className, value) {
+            var els = document.getElementsByClassName(className);
+
+            Array.prototype.forEach.call(els, function(el) {
+                el.value = value;
+            });
+        }
+
+        function convertFromHex(val) {
+            var hex = val.toString();//force conversion
+            var str = '';
+            for (var i = 0; i < hex.length; i += 2)
+                str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+            return str;
+        }
+
+        function convertToHex(str) {
+            var hex = '';
+            for(var i=0;i<str.length;i++) {
+                hex += ''+str.charCodeAt(i).toString(16);
+            }
+            return hex;
+        }
+
+        function callback(textareaId) {
+            return function (result, error) {
+                textareaSetValue(textareaId, result, error)
+            }
+        }
+
+        function onScanCard() {
+            var body = document.getElementById("messageBody").value;
+            var header = document.getElementById("messageHeader").value;
+            /** @type {Message} */
+            var initialMessage = {};
+            if (body) {
+                initialMessage.body = body;
+            }
+            if (header) {
+                initialMessage.header = header;
+            }
+
+            TangemSdk.scanCard(initialMessage, function (response, error) {
+                textareaSetValue("taScanCard", response, error);
+                if (response) {
+                    setByClass("cardId", response.cardId);
+                    setByClass("issuerDataSignature", response.issuerPublicKey);
+                    if (response.wallets.length > 0) {
+                        setByClass("walletPublicKey", response.wallets[0].publicKey);
+                    }
+                }
+            });
         }
 
         function onSign() {
-            TangemSdk.sign(callback, cid, [
+            var hashes = [
                 "44617461207573656420666f722068617368696e67",
                 "4461746120666f7220757365642068617368696e67"
-            ]);
+            ];
+            var walletPublicKey = document.getElementById("signWalletPublicKey").value;
+            var cardId = document.getElementById("signCardId").value;
+            TangemSdk.sign(
+              hashes, walletPublicKey, cardId, undefined, callback("taSign"));
         }
 
         function onVerify(){
-            TangemSdk.verify(callback, cid, true);
+            TangemSdk.verify(true, undefined, undefined, callback("taVerify"));
         }
 
         function onReadIssuerData() {
-            TangemSdk.readIssuerData(callback, cid);
+            TangemSdk.readIssuerData(undefined, undefined, callback("taReadIssuerData"));
         }
 
 //        cid = "bb03000000000004"
@@ -85,61 +142,68 @@ var app = {
 //        counter = 1
 //        signedIssuerData = "eb75dd996d324a572d65358de4ab7fab822bd98f1ebe684d07fd2987f7820beecd8881cbeb81610fe17597d1a7f08167dc02bf5d6941ec3c2f9f40f2a4cc1784"
         function onWriteIssuerData() {
-            TangemSdk.writeIssuerData(callback, cid,
-                "4461746120746f206265207772697474656e206f6e20612063617264206173206973737565722064617461",
-                "eb75dd996d324a572d65358de4ab7fab822bd98f1ebe684d07fd2987f7820beecd8881cbeb81610fe17597d1a7f08167dc02bf5d6941ec3c2f9f40f2a4cc1784",
-                { issuerDataCounter: 1 }
-            );
+            var data = document.getElementById("IssuerData").value;
+            var signature = document.getElementById("issuerDataSignature").value;
+            TangemSdk.writeIssuerData(convertToHex(data), signature, 0, undefined, undefined, callback("taWriteIssuerData"));
         }
         
         function onReadIssuerExtraData() {
-            TangemSdk.readIssuerExtraData(callback, cid);
+            TangemSdk.readIssuerExtraData(undefined, undefined, callback("taReadIssuerExtraData"));
         }
         
         function onWriteIssuerExtraData() {
+            /*
             TangemSdk.writeIssuerExtraData(callback, cid,
                 "44617461207573656420666f722068617368696e67",
                 "44617461207573656420666f722068617368696e67",
                 "44617461207573656420666f722068617368696e67",
                 { issuerDataCounter: 0 }
             );
+
+             */
         }
         
         function onReadUserData() {
-            TangemSdk.readUserData(callback, cid);
+            TangemSdk.readUserData(undefined, undefined, callback("taReadUserData"));
         }
         
         function onWriteUserData() {
-            TangemSdk.writeUserData(callback, cid,
-                "44617461207573656420666f722068617368696e67", { userCounter: 0 });
+            TangemSdk.writeUserData("44617461207573656420666f722068617368696e67", 0, undefined, undefined, callback("taWriteUserData"));
         }
 
         function onWriteUserProtectedData() {
+            /*
             TangemSdk.writeUserProtectedData(callback, cid,
                 "44617461207573656420666f722068617368696e67", { userProtectedCounter: 0 });
+
+             */
         }
         
         function onCreateWallet() {
-            TangemSdk.createWallet(callback, cid);
+            TangemSdk.createWallet(undefined, undefined, undefined, callback("taCreateWallet"));
         }
         
         function onPurgeWallet() {
-            TangemSdk.purgeWallet(callback, cid);
+            var walletPublicKey = document.getElementById("signWalletPublicKey").value;
+            TangemSdk.purgeWallet(walletPublicKey, undefined, undefined, callback("taPurgeWallet"));
         }
 
         function onChangePin1() {
-            TangemSdk.changePin1(callback, cid);
+            //TangemSdk.changePin1(callback, cid);
         }
 
         function onChangePin2() {
-            TangemSdk.changePin2(callback, cid);
+           // TangemSdk.changePin2(callback, cid);
         }
 
         function onFilesRead() {
+            /*
             TangemSdk.readFiles(callback, {
               readPrivateFiles: false,
               indices: null
             });
+
+             */
         }
 
         function onFilesWrite() {
@@ -159,12 +223,12 @@ var app = {
                 issuerPublicKey: "045F16BD1D2EAFE463E62A335A09E6B2BBCBD04452526885CB679FC4D27AF1BD22F553C7DEEFB54FD3D4F361D14E6DC3F11B7D4EA183250A60720EBDF9E110CD26"
             };
             var filesProtectedByIssuer = [fileSignedByIssuer];
-            TangemSdk.writeFiles(callback, filesProtectedByIssuer);
+            //TangemSdk.writeFiles(callback, filesProtectedByIssuer);
         }
 
         function onFilesDelete() {
 //            indices = [0, 2, 3]
-            TangemSdk.deleteFiles(callback, { indices: null });
+            //TangemSdk.deleteFiles(callback, { indices: null });
         }
 
         function onFilesChangeSettings() {
@@ -180,20 +244,8 @@ var app = {
                     settings: 1
                 }
             ]
-            TangemSdk.changeFilesSettings(callback, changes);
+            //TangemSdk.changeFilesSettings(callback, changes);
         }
-    },
-
-    // Update DOM on a Received Event
-    receivedEvent: function(id) {
-        var parentElement = document.getElementById(id);
-        var listeningElement = parentElement.querySelector('.listening');
-        var receivedElement = parentElement.querySelector('.received');
-
-        listeningElement.setAttribute('style', 'display:none;');
-        receivedElement.setAttribute('style', 'display:block;');
-
-        console.log('Received Event: ' + id);
     }
 };
 

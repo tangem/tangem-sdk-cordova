@@ -9,7 +9,7 @@ cordova plugin add tangem-sdk
 
 Add a platform to the project
 ```bash
-cordova platorm add android|ios
+cordova platform add android|ios
 ```
 
 Run it!
