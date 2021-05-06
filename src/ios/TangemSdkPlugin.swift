@@ -26,7 +26,13 @@ import TangemSdk
                  walletPublicKey: walletPublicKey,
                  cardId: params?.getArg(.cardId),
                  initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
-                    self?.handleResult(result, callbackId: command.callbackId)
+            switch result {
+            case .success(let signResponse):
+                let hexes = signResponse.map { $0.asHexString() }
+                self.handleResult(.success(hexes), callbackId: command.callbackId)
+            case .failure(let error):
+                self.handleResult(Result<[String], TangemSdkError>.failure(error), callbackId: command.callbackId)
+            }
         }
     }
 
