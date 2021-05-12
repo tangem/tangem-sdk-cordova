@@ -126,7 +126,8 @@ import TangemSdk
     }
 
     @objc(createWallet:) func createWallet(command: CDVInvokedUrlCommand) {
-        sdk.createWallet(cardId: command.params?.getArg(.cardId),
+        let config: WalletConfigWrapper? = command.params?.getArg(.config)
+        sdk.createWallet(config: config.map { $0.walletConfig }, cardId: command.params?.getArg(.cardId),
                          initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
                             self?.handleResult(result, callbackId: command.callbackId)
         }
@@ -275,6 +276,7 @@ fileprivate enum ArgKey: String {
     case indices
     case changes
     case walletPublicKey
+    case config
 }
 
 fileprivate extension Dictionary where Key == String, Value == Any {
@@ -373,5 +375,16 @@ fileprivate struct FileSettingsChangeWrapper: Codable {
 
     var fileSettingsChange: FileSettingsChange {
         FileSettingsChange(fileIndex: fileIndex, settings: FileSettings(rawValue: settings)!)
+    }
+}
+
+fileprivate struct WalletConfigWrapper: Codable {
+    let isReusable: Bool?
+    let prohibitPurgeWallet: Bool?
+    let curveId: String?
+    let signingMethods: String?
+
+    var walletConfig: WalletConfig {
+        WalletConfig(isReusable: isReusable, prohibitPurgeWallet: prohibitPurgeWallet, curveId: (curveId != nil) ?  EllipticCurve(rawValue: curveId!) : nil, signingMethods: nil)
     }
 }

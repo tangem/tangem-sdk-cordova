@@ -31,12 +31,12 @@ var TangemSdk = {
 
 	/**
 	 * Firmware Type ("d SDK", "r", "special")
-	 *  @typedef {string} FirmwareType
+	 * @typedef {string} FirmwareType
 	 */
 
 	/**
-	 *  Stores and maps Tangem card settings
-	 * @typedef {string} SettingsMask.
+	 * Stores and maps Tangem card settings
+	 * @typedef {string} SettingsMask
 	 */
 
 	/**
@@ -77,7 +77,7 @@ var TangemSdk = {
 	 * @property {string} [issuerName] Name of the issuer.
 	 * @property {Date} [manufactureDateTime] Timestamp of manufacturing
 	 * @property {Data} [manufacturerSignature] Signature of CardId with manufacturer’s private key.
-	 * @property {[ProductMask]} [productMask] Mask of products enabled on card.
+	 * @property {ProductMask[]} [productMask] Mask of products enabled on card.
 	 * @property {string} [tokenSymbol] Name of the token
 	 * @property {string} [tokenContractAddress] Smart contract address.
 	 * @property {number} [tokenDecimal] Number of decimals in token value.
@@ -148,7 +148,7 @@ var TangemSdk = {
 	 * @property {FirmwareVersion} firmwareVersion Version of Tangem COS.
 	 * @property {Data} [cardPublicKey] Public key that is used to authenticate the card against manufacturer’s database.
 	 *  It is generated one time during card manufacturing.
-	 * @property {[SettingsMask]} [settingsMask] Card settings defined by personalization (bit mask: 0 – Enabled, 1 – Disabled).
+	 * @property {SettingsMask[]} [settingsMask] Card settings defined by personalization (bit mask: 0 – Enabled, 1 – Disabled).
 	 * @property {Data} [issuerPublicKey] Public key that is used by the card issuer to sign IssuerData field.
 	 * @property {SigningMethod} [signingMethods] Defines what data should be submitted to SIGN command.
 	 * @property {number} [pauseBeforePin2] Delay in centiseconds before COS executes commands protected by PIN2. This is a security delay value
@@ -170,7 +170,7 @@ var TangemSdk = {
 	 *  Cards complaint with Tangem Wallet application should have TLV format.
 	 * @property {boolean} [pin2IsDefault] Available only for cards with COS v.4.0 and higher.
 	 * @property {number} [walletsCount] Maximum number of wallets that can be created for this card
-	 * @property {[CardWallet]} [wallets] Array of the wallets
+	 * @property {CardWallet[]} [wallets] Array of the wallets
 	 */
 
 	/**
@@ -184,7 +184,7 @@ var TangemSdk = {
 	/**
 	 * To start using any card, you first need to read it using the `scanCard()` method.
 	 * This method launches an NFC session, and once it’s connected with the card,
-	 * it obtains the card data. optionsly, if the card contains a wallet (private and public key pair),
+	 * it obtains the card data. optionally, if the card contains a wallet (private and public key pair),
 	 * it proves that the wallet owns a private key that corresponds to a public one.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
 	 * @param {ScanCardCallback} [callback] Callback for command
@@ -200,7 +200,7 @@ var TangemSdk = {
 	/**
 	 * The callback for success scan card.
 	 * @callback SignCallback
-	 * @param {[Data]} [response] Signed hashes (array of resulting signatures)
+	 * @param {Data[]} [response] Signed hashes (array of resulting signatures)
 	 * @param {TangemSdkError} [error] Error
 	 * @return {void}
 	 */
@@ -214,8 +214,8 @@ var TangemSdk = {
 	 * that may last up to 45 seconds, depending on a card.
 	 * It is for `SessionViewDelegate` to notify users of security delay.
 	 * Note: Wallet index works only on COS v.4.0 and higher. For previous version index will be ignored
-	 * @param {[Data]} hashes Array of transaction hashes. It can be from one or up to ten hashes of the same length.
-	 * @param {Data} walletPublicKey  Public key of wallet that should sign hashes.
+	 * @param {Data[]} hashes Array of transaction hashes. It can be from one or up to ten hashes of the same length.
+	 * @param {Data} walletPublicKey Public key of wallet that should sign hashes.
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
 	 * @param {SignCallback} [callback] Callback for result
@@ -258,9 +258,9 @@ var TangemSdk = {
 	 * The command to ensures the card has not been counterfeited.
 	 * By using standard challenge-response scheme, the card proves possession of CardPrivateKey
 	 * that corresponds to CardPublicKey returned by [ReadCommand]. Then the data is sent
-	 * to Tangem server to prove that  this card was indeed issued by Tangem.
+	 * to Tangem server to prove that this card was indeed issued by Tangem.
 	 * The online part of the verification is unavailable for DevKit cards.
-	 * @param {boolean} online flag that allows disable online verification. Do not use for developer cards
+	 * @param {boolean} online Flag that allows disable online verification. Do not use for developer cards
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
 	 * @param {VerifyCallback} [callback] Callback triggered on the completion of the VerifyCardCommand
@@ -323,7 +323,7 @@ var TangemSdk = {
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
 	 * @param {SimpleCallback} [callback] Callback for result
 	 */
-	writeIssuerData: function (issuerData,  issuerDataSignature,issuerDataCounter, cardId, initialMessage, callback) {
+	writeIssuerData: function (issuerData, issuerDataSignature, issuerDataCounter, cardId, initialMessage, callback) {
 		exec(
 			'writeIssuerData',
 			{
@@ -454,7 +454,7 @@ var TangemSdk = {
 	 * For example, this fields may contain blockchain nonce value.
 	 * Writing of UserCounter and UserData is protected only by PIN1.
 	 *
-	 * @param {Data} userData  Data defined by user’s App
+	 * @param {Data} userData Data defined by user’s App
 	 * @param {number} userCounter: Counter initialized by user’s App and increased on every signing of new transaction.
 	 *  If nil, the current counter value will not be overwritten.
 	 * @param {string} [cardId] Unique Tangem card ID number.
@@ -642,7 +642,7 @@ var TangemSdk = {
 
 	/**
 	 * @typedef {Object} ReadFilesResponse
-	 * @property {[File]} files
+	 * @property {File[]} files
 	 */
 
 	/**
@@ -655,11 +655,11 @@ var TangemSdk = {
 	/**
 	 * This command reads all files stored on card.
 	 * By default command trying to read all files (including private), to change this behaviour - setup your ` ReadFileDataTaskSetting `
-	 * - Note: When performing reading private files command, you must  provide `pin2`
+	 * - Note: When performing reading private files command, you must provide `pin2`
 	 * - Warning: Command available only for cards with COS 3.29 and higher
 	 *
 	 * @param {boolean} readPrivateFiles If true - all files saved on card will be read otherwise
-	 * @param {[number]} [indices] Indices of files that should be read from card. If not specifies all files will be read.
+	 * @param {number[]} [indices] Indices of files that should be read from card. If not specifies all files will be read.
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
 	 * @param {ReadFilesCallback} [callback] Callback for result
@@ -687,12 +687,12 @@ var TangemSdk = {
 	 * This command write all files provided in `files` to card.
 	 *
 	 * There are 2 main implementation of `DataToWrite` protocol:
-	 * - `FileDataProtectedBySignature` - for files  signed by Issuer (specified on card during personalization)
+	 * - `FileDataProtectedBySignature` - for files signed by Issuer (specified on card during personalization)
 	 * - `FileDataProtectedByPasscode` - write files protected by Pin2
 	 *
 	 * Warning: This command available for COS 3.29 and higher
 	 * Note: Writing files protected by Pin2 only available for COS 3.34 and higher
-	 * @param {[File]} files List of files that should be written to card
+	 * @param {File[]} files List of files that should be written to card
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
 	 * @param {ReadFilesCallback} [callback] Callback for result
@@ -711,7 +711,7 @@ var TangemSdk = {
 	 * To perform file deletion you should initially read all files (`readFiles` command) and add them to `indices` array. When files deleted from card, other files change their indexes.
 	 * After deleting files you should additionally perform `readFiles` command to actualize files indexes
 	 * Warning: This command available for COS 3.29 and higher
-	 * @param {[number]} [indicesToDelete] Indexes of files that should be deleted. If nil - deletes all files from card
+	 * @param {number[]} [indicesToDelete] Indexes of files that should be deleted. If nil - deletes all files from card
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
 	 * @param {SimpleCallback} [callback] Callback for result
