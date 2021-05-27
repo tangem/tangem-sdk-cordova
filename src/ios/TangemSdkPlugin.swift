@@ -380,9 +380,9 @@ fileprivate struct WalletConfigWrapper: Codable {
     let isReusable: Bool?
     let prohibitPurgeWallet: Bool?
     let curveId: String?
-    let signingMethods: String?
+    let signingMethods: SigningMethod?
 
     var walletConfig: WalletConfig {
-        WalletConfig(isReusable: isReusable, prohibitPurgeWallet: prohibitPurgeWallet, curveId: (curveId != nil) ?  EllipticCurve(rawValue: curveId!) : nil, signingMethods: nil)
+        WalletConfig(isReusable: isReusable, prohibitPurgeWallet: prohibitPurgeWallet, curveId: (curveId != nil) ?  EllipticCurve(rawValue: curveId!) : nil, signingMethods: signingMethods)
     }
 }
