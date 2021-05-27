@@ -69,8 +69,7 @@ import TangemSdk
 
     @objc(writeIssuerExtraData:) func writeIssuerExtraData(command: CDVInvokedUrlCommand) {
         let params = command.params
-        guard let cardId: String = params?.getArg(.cardId),
-            let issuerData: Data = params?.getArg(.issuerData),
+        guard let issuerData: Data = params?.getArg(.issuerData),
             let startingSignature: Data = params?.getArg(.startingSignature),
             let finalizingSignature: Data = params?.getArg(.finalizingSignature) else {
                 handleMissingArgs(callbackId: command.callbackId)
@@ -81,7 +80,7 @@ import TangemSdk
                                  startingSignature: startingSignature,
                                  finalizingSignature: finalizingSignature,
                                  issuerDataCounter: params?.getArg(.issuerDataCounter),
-                                 cardId: cardId,
+                                 cardId: params?.getArg(.cardId),
                                  initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
                                     self?.handleResult(result, callbackId: command.callbackId)
         }
@@ -111,15 +110,14 @@ import TangemSdk
 
     @objc(writeUserProtectedData:) func writeUserProtectedData(command: CDVInvokedUrlCommand) {
         let params = command.params
-        guard let cardId: String = params?.getArg(.cardId),
-            let userProtectedData: Data = params?.getArg(.userProtectedData) else {
+        guard let userProtectedData: Data = params?.getArg(.userProtectedData) else {
                 handleMissingArgs(callbackId: command.callbackId)
                 return
         }
 
         sdk.writeUserProtectedData(userProtectedData: userProtectedData,
                                    userProtectedCounter: params?.getArg(.userProtectedCounter),
-                                   cardId: cardId,
+                                   cardId: params?.getArg(.cardId),
                                    initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
                                     self?.handleResult(result, callbackId: command.callbackId)
         }

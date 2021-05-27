@@ -3,7 +3,7 @@ window.customElements.define('capacitor-welcome', class extends HTMLElement {
     super();
 
     Capacitor.Plugins.SplashScreen.hide();
-    
+
     const root = this.attachShadow({ mode: 'open' });
 
     root.innerHTML = `
@@ -56,12 +56,12 @@ window.customElements.define('capacitor-welcome', class extends HTMLElement {
       </capacitor-welcome-titlebar>
       <main>
         <p>
-          This demo shows how to call TangemSdk plugins. Say cheese!
+          This demo shows how to call TangemSdk plugins. Say cheese!!!
         </p>
 
         <p><button class="button" id="scan-card">Scan card</button></p>
         <p><button class="button" id="sign">Sign</button></p>
-
+        <textarea id="log"></textarea>   
       </main>
     </div>
     `
@@ -70,23 +70,42 @@ window.customElements.define('capacitor-welcome', class extends HTMLElement {
   connectedCallback() {
     const self = this;
 
-    var cid = "BB03000000000004";
-    var callback = {
-        success: function(result) {
-            console.log("result: " + JSON.stringify(result));
-        },
-        error: function(error) {
-            console.log("error: " + JSON.stringify(error));
-        }
+    let cardId;
+    let walletPublicKey;
+
+    function setLog(value) {
+      const text = document.getElementById("log");
+      if (text) {
+        text.value(value);
+      }
+    }
+
+    function callback() {
+      return function (result, error) {
+        setLog(result, error)
+      }
     }
 
     self.shadowRoot.querySelector('#scan-card')
         .addEventListener('click', async function(e) {
-            TangemSdk.scanCard(callback);
+          TangemSdk.scanCard(initialMessage, function (response, error) {
+            if (response) {
+              cardId = response.cardId;
+              if (response.wallets.length > 0) {
+                walletPublicKey = response.wallets[0].publicKey;
+              }
+            }
+          });
         })
     self.shadowRoot.querySelector('#sign')
         .addEventListener('click', async function(e) {
-            TangemSdk.sign(callback, cid, ["44617461207573656420666f722068617368696e67", "44617461207573656420666f722068617368696e67"]);
+            TangemSdk.sign(
+              ["44617461207573656420666f722068617368696e67", "44617461207573656420666f722068617368696e67"],
+              walletPublicKey,
+              cardId,
+              undefined,
+              callback
+            );
         })
   }
 });

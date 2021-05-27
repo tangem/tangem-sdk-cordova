@@ -46,7 +46,7 @@
                 <source url="https://github.com/CocoaPods/Specs.git" />
             </config>
             <pods use-frameworks="true">
-                <pod name="TangemSdk" git="https://github.com/tangem/tangem-sdk-ios" tag="develop-21" />
+                <pod name="TangemSdk" spec="~> 3.0.2" />
             </pods>
         </podspec>
         <config-file parent="/*" target="config.xml">

@@ -591,30 +591,30 @@ var TangemSdk = {
 
 	/**
 	 * Command for change pin1
-	 * @param {Data} pin Pin data
+	 * @param {Data} pinCode Pin data
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
 	 * @param {ChangePinCallback} [callback] Callback for result
 	 */
-	changePin1: function (pin, cardId, initialMessage, callback) {
+	changePin1: function (pinCode, cardId, initialMessage, callback) {
 		exec(
 			'changePin1',
-			{ pin: pin, cardId: cardId, initialMessage: initialMessage	},
+			{ pinCode: pinCode, cardId: cardId, initialMessage: initialMessage	},
 			callback
 		)
 	},
 
 	/**
 	 * Command for change pin2
-	 * @param {Data} pin Pin data
+	 * @param {Data} pinCode Pin data
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
 	 * @param {ChangePinCallback} [callback] Callback for result
 	 */
-	changePin2: function (pin, cardId, initialMessage, callback) {
+	changePin2: function (pinCode, cardId, initialMessage, callback) {
 		exec(
 			'changePin2',
-			{ pin: pin, cardId: cardId, initialMessage: initialMessage	},
+			{ pinCode: pinCode, cardId: cardId, initialMessage: initialMessage	},
 			callback
 		);
 	},
@@ -673,12 +673,14 @@ var TangemSdk = {
 	},
 
 	/**
-	 * @typedef {Object} Response
+	 * @typedef {Object} WriteFilesResponse
+	 * @property {string} cardId
+	 * @property {number} [fileIndex]
 	 */
 
 	/**
-	 * @callback Callback
-	 * @param {Response} [response]
+	 * @callback WriteFilesCallback
+	 * @param {WriteFilesResponse} [response]
 	 * @param {TangemSdkError} [error] Error
 	 * @return {void}
 	 */
@@ -695,7 +697,7 @@ var TangemSdk = {
 	 * @param {File[]} files List of files that should be written to card
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {ReadFilesCallback} [callback] Callback for result
+	 * @param {WriteFilesCallback} [callback] Callback for result
 	 */
 	writeFiles: function (files, cardId, initialMessage, callback) {
 		exec(
