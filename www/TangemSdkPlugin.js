@@ -591,30 +591,30 @@ var TangemSdk = {
 
 	/**
 	 * Command for change pin1
-	 * @param {Data} pinCode Pin data
+	 * @param {Data} pin Pin data
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
 	 * @param {ChangePinCallback} [callback] Callback for result
 	 */
-	changePin1: function (pinCode, cardId, initialMessage, callback) {
+	changePin1: function (pin, cardId, initialMessage, callback) {
 		exec(
 			'changePin1',
-			{ pinCode: pinCode, cardId: cardId, initialMessage: initialMessage	},
+			{ pin: pin, cardId: cardId, initialMessage: initialMessage	},
 			callback
 		)
 	},
 
 	/**
 	 * Command for change pin2
-	 * @param {Data} pinCode Pin data
+	 * @param {Data} pin Pin data
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
 	 * @param {ChangePinCallback} [callback] Callback for result
 	 */
-	changePin2: function (pinCode, cardId, initialMessage, callback) {
+	changePin2: function (pin, cardId, initialMessage, callback) {
 		exec(
 			'changePin2',
-			{ pinCode: pinCode, cardId: cardId, initialMessage: initialMessage	},
+			{ pin: pin, cardId: cardId, initialMessage: initialMessage	},
 			callback
 		);
 	},
