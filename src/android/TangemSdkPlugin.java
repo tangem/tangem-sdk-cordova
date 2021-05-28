@@ -2,24 +2,13 @@ package tangem_sdk;
 
 import android.app.Activity;
 import android.content.Context;
-import androidx.annotation.Nullable;
 import com.squareup.sqldelight.android.AndroidSqliteDriver;
 import com.squareup.sqldelight.db.SqlDriver;
-import com.tangem.Config;
-import com.tangem.Database;
-import com.tangem.Message;
-import com.tangem.TangemError;
-import com.tangem.TangemSdk;
-import com.tangem.TangemSdkError;
+import com.tangem.*;
 import com.tangem.commands.common.ResponseConverter;
-import com.tangem.commands.file.FileData;
-import com.tangem.commands.file.FileDataSignature;
-import com.tangem.commands.file.FileSettings;
-import com.tangem.commands.file.FileSettingsChange;
 import com.tangem.common.CardValuesDbStorage;
 import com.tangem.common.CardValuesStorage;
 import com.tangem.common.CompletionResult;
-import com.tangem.common.extensions.StringKt;
 import com.tangem.tangem_sdk_new.DefaultSessionViewDelegate;
 import com.tangem.tangem_sdk_new.TerminalKeysStorage;
 import com.tangem.tangem_sdk_new.extensions.TangemSdkErrorKt;
@@ -31,12 +20,10 @@ import org.apache.cordova.CordovaWebView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
 
-import static com.tangem.commands.file.FileData.DataProtectedByPasscode;
-import static com.tangem.commands.file.FileData.DataProtectedBySignature;
+import java.lang.ref.WeakReference;
+
+import static tangem_sdk.FieldParser.*;
 
 /**
  * This class echoes a string called from JavaScript.
@@ -187,8 +174,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.scanCard(
-                    null,
-                    FieldParser.message(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -202,10 +188,10 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.sign(
-                    FieldParser.hashes(jsO),
-                    null,
-                    FieldParser.cid(jsO),
-                    FieldParser.message(jsO),
+                    hashes(jsO),
+                    walletPublicKey(jsO),
+                    cardId(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -219,9 +205,9 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.verify(
-                    FieldParser.cid(jsO),
-                    FieldParser.online(jsO),
-                    FieldParser.message(jsO),
+                    onlineVerify(jsO),
+                    cardId(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -236,8 +222,8 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.readIssuerData(
-                    FieldParser.cid(jsO),
-                    FieldParser.message(jsO),
+                    cardId(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -251,11 +237,11 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.writeIssuerData(
-                    FieldParser.cid(jsO),
-                    FieldParser.issuerData(jsO),
-                    FieldParser.issuerDataSignatures(jsO),
-                    FieldParser.issuerDataCounter(jsO),
-                    FieldParser.message(jsO),
+                    cardId(jsO),
+                    issuerData(jsO),
+                    issuerDataSignatures(jsO),
+                    issuerDataCounter(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -269,8 +255,8 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.readIssuerExtraData(
-                    FieldParser.cid(jsO),
-                    FieldParser.message(jsO),
+                    cardId(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -284,12 +270,12 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.writeIssuerExtraData(
-                    FieldParser.cid(jsO),
-                    FieldParser.issuerData(jsO),
-                    FieldParser.startingSignature(jsO),
-                    FieldParser.finalizingSignature(jsO),
-                    FieldParser.issuerDataCounter(jsO),
-                    FieldParser.message(jsO),
+                    cardId(jsO),
+                    issuerData(jsO),
+                    startingSignature(jsO),
+                    finalizingSignature(jsO),
+                    issuerDataCounter(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -303,8 +289,8 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.readUserData(
-                    FieldParser.cid(jsO),
-                    FieldParser.message(jsO),
+                    cardId(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -318,10 +304,10 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.writeUserData(
-                    FieldParser.cid(jsO),
-                    FieldParser.userData(jsO),
-                    FieldParser.userCounter(jsO),
-                    FieldParser.message(jsO),
+                    cardId(jsO),
+                    userData(jsO),
+                    userCounter(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -335,10 +321,10 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.writeUserProtectedData(
-                    FieldParser.cid(jsO),
-                    FieldParser.userProtectedData(jsO),
-                    FieldParser.userProtectedCounter(jsO),
-                    FieldParser.message(jsO),
+                    cardId(jsO),
+                    userProtectedData(jsO),
+                    userProtectedCounter(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -352,10 +338,9 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.createWallet(
-                    null,
-                    null,
-                    FieldParser.cid(jsO),
-                    FieldParser.message(jsO),
+                    walletConfig(jsO),
+                    cardId(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -369,9 +354,9 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.purgeWallet(
-                    null,
-                    FieldParser.cid(jsO),
-                    FieldParser.message(jsO),
+                    walletIndexFromPublicKey(jsO),
+                    cardId(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -385,9 +370,9 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.changePin1(
-                    FieldParser.cid(jsO),
-                    FieldParser.pinCode(jsO),
-                    FieldParser.message(jsO),
+                    cardId(jsO),
+                    pinCode(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -401,9 +386,9 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.changePin2(
-                    FieldParser.cid(jsO),
-                    FieldParser.pinCode(jsO),
-                    FieldParser.message(jsO),
+                    cardId(jsO),
+                    pinCode(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -417,10 +402,10 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.readFiles(
-                    ((boolean) jsO.get("readPrivateFiles")),
-                    FieldParser.indices(jsO),
-                    FieldParser.cid(jsO),
-                    FieldParser.message(jsO),
+                    ((boolean) jsO.optBoolean("readPrivateFiles")),
+                    indices(jsO),
+                    cardId(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -434,9 +419,9 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.writeFiles(
-                    FieldParser.files(jsO),
-                    FieldParser.cid(jsO),
-                    FieldParser.message(jsO),
+                    files(jsO),
+                    cardId(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -450,9 +435,9 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.deleteFiles(
-                    FieldParser.indices(jsO),
-                    FieldParser.cid(jsO),
-                    FieldParser.message(jsO),
+                    indices(jsO),
+                    cardId(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -466,9 +451,9 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.changeFilesSettings(
-                    FieldParser.changes(jsO),
-                    FieldParser.cid(jsO),
-                    FieldParser.message(jsO),
+                    changes(jsO),
+                    cardId(jsO),
+                    initialMessage(jsO),
                     completionResult -> {
                         handleResult(callbackContext, completionResult);
                         return null;
@@ -513,163 +498,6 @@ public class TangemSdkPlugin extends CordovaPlugin {
         public PluginError(int code, String localizedDescription) {
             this.code = code;
             this.localizedDescription = localizedDescription;
-        }
-    }
-
-    private static class FieldParser {
-
-        public static Message message(JSONObject jsO) throws JSONException {
-            if (!jsO.has("initialMessage")) return null;
-
-            Object objMessage = jsO.opt("initialMessage");
-            if (objMessage == null || !(objMessage instanceof JSONObject)) return null;
-
-            JSONObject jsMessage = ((JSONObject) objMessage);
-
-            String header = jsMessage.getString("header");
-            String body = jsMessage.getString("body");
-            return new Message(header, body);
-        }
-
-        public static String cid(JSONObject jsO) throws JSONException {
-            if (jsO.isNull("cid")) return null;
-            return ((String) jsO.get("cid"));
-        }
-
-        public static Boolean online(JSONObject jsO) throws JSONException {
-            return ((Boolean) jsO.getBoolean("online"));
-        }
-
-        public static byte[] pinCode(JSONObject jsO) {
-            Object pinRaw = jsO.opt("pinCode");
-            if (pinRaw == null || !(pinRaw instanceof String)) return null;
-
-            return StringKt.calculateSha256(((String) pinRaw));
-        }
-
-        public static byte[][] hashes(JSONObject jsO) throws JSONException {
-            JSONArray array = ((JSONArray) jsO.get("hashes"));
-
-            byte[][] listOfBytes = new byte[array.length()][];
-            for (int i = 0; i < array.length(); i++) {
-                listOfBytes[i] = hexToBytes((String) array.get(i));
-            }
-            //listOfBytes[0] = hexToBytes(ByteArrayKt.toHexString("Data used for hashing".getBytes()));
-            //listOfBytes[1] = hexToBytes(ByteArrayKt.toHexString("Data used for hashing".getBytes()));
-            return listOfBytes;
-        }
-
-        public static byte[] issuerData(JSONObject jsO) throws JSONException {
-            return fetchHexStringAndConvertToBytes(jsO, "issuerData");
-        }
-
-        public static byte[] issuerDataSignatures(JSONObject jsO) throws JSONException {
-            return fetchHexStringAndConvertToBytes(jsO, "issuerDataSignature");
-        }
-
-        public static byte[] startingSignature(JSONObject jsO) throws JSONException {
-            return fetchHexStringAndConvertToBytes(jsO, "startingSignature");
-        }
-
-        public static byte[] finalizingSignature(JSONObject jsO) throws JSONException {
-            return fetchHexStringAndConvertToBytes(jsO, "finalizingSignature");
-        }
-
-        @Nullable
-        public static Integer issuerDataCounter(JSONObject jsO) throws JSONException {
-            return jsO.has("issuerDataCounter") ? jsO.getInt("issuerDataCounter") : null;
-        }
-
-        public static byte[] userData(JSONObject jsO) throws JSONException {
-            return fetchHexStringAndConvertToBytes(jsO, "userData");
-        }
-
-        public static byte[] userProtectedData(JSONObject jsO) throws JSONException {
-            return fetchHexStringAndConvertToBytes(jsO, "userProtectedData");
-        }
-
-        @Nullable
-        public static Integer userCounter(JSONObject jsO) throws JSONException {
-            return jsO.has("userCounter") ? jsO.getInt("userCounter") : null;
-        }
-
-        @Nullable
-        public static Integer userProtectedCounter(JSONObject jsO) throws JSONException {
-            return jsO.has("userProtectedCounter") ? jsO.getInt("userProtectedCounter") : null;
-        }
-
-        private static byte[] fetchHexStringAndConvertToBytes(JSONObject jsO, String name) throws JSONException {
-            String hexString = jsO.getString(name);
-            return hexToBytes(hexString);
-        }
-
-        private static byte[] hexToBytes(String hexString) {
-            return StringKt.hexToBytes(hexString);
-        }
-
-        public static List<Integer> indices(JSONObject jsO) throws JSONException {
-            if (jsO.isNull("indices")) return null;
-
-            JSONArray jsonArray = jsO.getJSONArray("indices");
-            List<Integer> list = new ArrayList();
-            int len = jsonArray.length();
-            for (int i = 0; i < len; i++) {
-                Object item = jsonArray.get(i);
-                if (item instanceof Integer) list.add(((Integer) item));
-            }
-            return list;
-        }
-
-        public static List<FileData> files(JSONObject jsO) throws JSONException {
-            if (jsO.isNull("files")) return null;
-
-            List<FileData> list = new ArrayList();
-            JSONArray jsonArray = jsO.getJSONArray("files");
-            int len = jsonArray.length();
-            for (int i = 0; i < len; i++) {
-                Object item = jsonArray.get(i);
-                if (!(item instanceof JSONObject)) continue;
-
-                JSONObject itemJso = ((JSONObject) item);
-                byte[] data = fetchHexStringAndConvertToBytes(itemJso, "data");
-                if (itemJso.has("counter") && itemJso.has("signature")) {
-                    // DataProtectedBySignature
-                    int counter = itemJso.getInt("counter");
-                    JSONObject signatureJso = itemJso.getJSONObject("signature");
-                    FileDataSignature signature = new FileDataSignature(
-                            fetchHexStringAndConvertToBytes(signatureJso, "startingSignature"),
-                            fetchHexStringAndConvertToBytes(signatureJso, "finalizingSignature")
-                    );
-                    DataProtectedBySignature dpbs = new DataProtectedBySignature(
-                            data,
-                            counter,
-                            signature,
-                            fetchHexStringAndConvertToBytes(itemJso, "issuerPublicKey")
-                    );
-                    list.add(dpbs);
-                } else {
-                    // DataProtectedByPasscode
-                    list.add(new DataProtectedByPasscode(data));
-                }
-            }
-            return list;
-        }
-
-        public static List<FileSettingsChange> changes(JSONObject jsO) throws JSONException {
-            List<FileSettingsChange> list = new ArrayList();
-            JSONArray jsonArray = jsO.getJSONArray("changes");
-            for (int i = 0; i < jsonArray.length(); i++) {
-                Object item = jsonArray.get(i);
-                if (!(item instanceof JSONObject)) continue;
-
-                JSONObject itemJso = ((JSONObject) item);
-                FileSettingsChange fsc = new FileSettingsChange(
-                        itemJso.getInt("fileIndex"),
-                        FileSettings.Companion.byRawValue(itemJso.getInt("settings"))
-                );
-                list.add(fsc);
-            }
-            return list;
         }
     }
 }
