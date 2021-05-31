@@ -1,26 +1,26 @@
 package tangem_sdk;
 
 import androidx.annotation.Nullable;
-
 import com.tangem.Message;
-import com.tangem.commands.common.card.EllipticCurve;
-import com.tangem.commands.common.card.masks.SigningMethod;
-import com.tangem.commands.file.FileData;
+import com.tangem.commands.common.jsonConverter.MoshiJsonConverter;
+import com.tangem.commands.file.DataToWrite;
 import com.tangem.commands.file.FileDataSignature;
 import com.tangem.commands.file.FileSettings;
 import com.tangem.commands.file.FileSettingsChange;
 import com.tangem.commands.wallet.WalletConfig;
 import com.tangem.commands.wallet.WalletIndex;
 import com.tangem.common.extensions.StringKt;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 class FieldParser {
+
+    private static final MoshiJsonConverter converter = MoshiJsonConverter.Companion.getINSTANCE();
 
     @Nullable
     public static Message initialMessage(JSONObject jsO) throws JSONException {
@@ -42,8 +42,8 @@ class FieldParser {
         return ((String) jsO.get("cardId"));
     }
 
-    public static Boolean onlineVerify(JSONObject jsO) throws JSONException {
-        return ((Boolean) jsO.getBoolean("onlineVerify"));
+    public static Boolean online(JSONObject jsO) throws JSONException {
+        return jsO.optBoolean("0", false);
     }
 
     @Nullable
@@ -55,11 +55,11 @@ class FieldParser {
     }
 
     public static byte[][] hashes(JSONObject jsO) throws JSONException {
-        JSONArray array = ((JSONArray) jsO.get("hashes"));
-
-        byte[][] listOfBytes = new byte[array.length()][];
-        for (int i = 0; i < array.length(); i++) {
-            listOfBytes[i] = hexToBytes((String) array.get(i));
+        String stringHashes = ((String) jsO.get("hashes"));
+        List<String> hashes = converter.fromJson(stringHashes, converter.typedList(String.class));
+        byte[][] listOfBytes = new byte[hashes.size()][];
+        for (int i = 0; i < hashes.size(); i++) {
+            listOfBytes[i] = hexToBytes(hashes.get(i));
         }
         return listOfBytes;
     }
@@ -131,10 +131,10 @@ class FieldParser {
     }
 
     @Nullable
-    public static List<FileData> files(JSONObject jsO) throws JSONException {
+    public static List<DataToWrite> files(JSONObject jsO) throws JSONException {
         if (jsO.isNull("files")) return null;
 
-        List<FileData> list = new ArrayList();
+        List<DataToWrite> list = new ArrayList();
         JSONArray jsonArray = jsO.getJSONArray("files");
         int len = jsonArray.length();
         for (int i = 0; i < len; i++) {
@@ -151,7 +151,7 @@ class FieldParser {
                         fetchHexStringAndConvertToBytes(signatureJso, "startingSignature"),
                         fetchHexStringAndConvertToBytes(signatureJso, "finalizingSignature")
                 );
-                FileData.DataProtectedBySignature dpbs = new FileData.DataProtectedBySignature(
+                DataToWrite.DataProtectedBySignature dpbs = new DataToWrite.DataProtectedBySignature(
                         data,
                         counter,
                         signature,
@@ -160,7 +160,7 @@ class FieldParser {
                 list.add(dpbs);
             } else {
                 // DataProtectedByPasscode
-                list.add(new FileData.DataProtectedByPasscode(data));
+                list.add(new DataToWrite.DataProtectedByPasscode(data));
             }
         }
         return list;
@@ -192,24 +192,17 @@ class FieldParser {
     public static WalletConfig walletConfig(JSONObject jsO) throws JSONException {
         if (!jsO.has("config")) return null;
 
-        JSONObject jsonObject = jsO.getJSONObject("config");
-        boolean containsIsReusable = jsonObject.has("isReusable");
-        boolean containsProhibitPurgeWallet = jsonObject.has("prohibitPurgeWallet");
-        EllipticCurve curve = null;
-        if (jsonObject.has("curveId")) {
-            String curveId = jsonObject.optString("curveId");
-            curve = EllipticCurve.valueOf(curveId);
+        //{"isReusable":false,"prohibitPurgeWallet":false,"curveId":"Secp256r1","signingMethods":"SignHash"}
+        try {
+            String jsonConfig = jsO.getString("config");
+            return converter.getMoshi().adapter(WalletConfig.class).fromJson(jsonConfig);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
-        SigningMethod signingMethod = null;
-        if (jsonObject.has("signingMethods")) {
-            String signingMethods = jsonObject.optString("signingMethods");
-            signingMethod = SigningMethod.valueOf(signingMethods);
-        }
-        return new WalletConfig(
-                containsIsReusable ? jsonObject.getBoolean("isReusable") : null,
-                containsProhibitPurgeWallet ? jsonObject.getBoolean("prohibitPurgeWallet") : null,
-                curve,
-                signingMethod
-        );
+    }
+
+    static String prettyPrint(Object any) {
+        return converter.prettyPrint(any, "  ");
     }
 }

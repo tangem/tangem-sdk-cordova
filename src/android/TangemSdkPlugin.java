@@ -5,7 +5,6 @@ import android.content.Context;
 import com.squareup.sqldelight.android.AndroidSqliteDriver;
 import com.squareup.sqldelight.db.SqlDriver;
 import com.tangem.*;
-import com.tangem.commands.common.ResponseConverter;
 import com.tangem.common.CardValuesDbStorage;
 import com.tangem.common.CardValuesStorage;
 import com.tangem.common.CompletionResult;
@@ -32,14 +31,11 @@ public class TangemSdkPlugin extends CordovaPlugin {
 
     private TangemSdk sdk;
     private NfcManager nfcManager;
-    private ResponseConverter converter;
     private WeakReference<Context> wActivityContext;
 
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
-
-        this.converter = new ResponseConverter();
 
         wActivityContext = new WeakReference<>(cordova.getContext());
         Activity activity = cordova.getActivity();
@@ -180,7 +176,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         return null;
                     });
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
@@ -197,7 +193,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         return null;
                     });
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
@@ -205,7 +201,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
             sdk.verify(
-                    onlineVerify(jsO),
+                    online(jsO),
                     cardId(jsO),
                     initialMessage(jsO),
                     completionResult -> {
@@ -214,7 +210,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
                     });
 
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
@@ -229,7 +225,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         return null;
                     });
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
@@ -247,7 +243,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         return null;
                     });
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
@@ -262,7 +258,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         return null;
                     });
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
@@ -281,7 +277,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         return null;
                     });
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
@@ -296,7 +292,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         return null;
                     });
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
@@ -313,7 +309,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         return null;
                     });
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
@@ -330,7 +326,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         return null;
                     });
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
@@ -346,7 +342,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         return null;
                     });
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
@@ -362,7 +358,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         return null;
                     });
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
@@ -378,7 +374,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         return null;
                     });
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
@@ -394,7 +390,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         return null;
                     });
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
@@ -411,7 +407,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         return null;
                     });
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
@@ -427,7 +423,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         return null;
                     });
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
@@ -443,7 +439,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         return null;
                     });
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
@@ -459,17 +455,17 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         return null;
                     });
         } catch (Exception ex) {
-            callbackContext.error(converter.getGson().toJson(createExceptionError(ex)));
+            callbackContext.error(prettyPrint(createExceptionError(ex)));
         }
     }
 
     private void handleResult(CallbackContext callbackContext, CompletionResult completionResult) {
         if (completionResult instanceof CompletionResult.Success) {
             CompletionResult.Success cardResult = (CompletionResult.Success) completionResult;
-            callbackContext.success(converter.getGson().toJson(cardResult.getData()));
+            callbackContext.success(prettyPrint(cardResult.getData()));
         } else if (completionResult instanceof CompletionResult.Failure) {
             CompletionResult.Failure failure = (CompletionResult.Failure) completionResult;
-            callbackContext.error(converter.getGson().toJson(createTangemSdkError(failure.getError())));
+            callbackContext.error(prettyPrint(createTangemSdkError(failure.getError())));
         }
     }
 
