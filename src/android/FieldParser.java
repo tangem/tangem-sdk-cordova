@@ -48,7 +48,7 @@ class FieldParser {
 
     @Nullable
     public static byte[] pinCode(JSONObject jsO) {
-        Object pinRaw = jsO.opt("pinCode");
+        Object pinRaw = jsO.opt("pin");
         if (pinRaw == null || !(pinRaw instanceof String)) return null;
 
         return StringKt.calculateSha256(((String) pinRaw));
