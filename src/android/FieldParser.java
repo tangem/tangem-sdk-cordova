@@ -3,7 +3,7 @@ package tangem_sdk;
 import androidx.annotation.Nullable;
 import com.tangem.Message;
 import com.tangem.commands.common.jsonConverter.MoshiJsonConverter;
-import com.tangem.commands.file.DataToWrite;
+import com.tangem.commands.file.FileData;
 import com.tangem.commands.file.FileDataSignature;
 import com.tangem.commands.file.FileSettings;
 import com.tangem.commands.file.FileSettingsChange;
@@ -131,10 +131,10 @@ class FieldParser {
     }
 
     @Nullable
-    public static List<DataToWrite> files(JSONObject jsO) throws JSONException {
+    public static List<FileData> files(JSONObject jsO) throws JSONException {
         if (jsO.isNull("files")) return null;
 
-        List<DataToWrite> list = new ArrayList();
+        List<FileData> list = new ArrayList();
         JSONArray jsonArray = jsO.getJSONArray("files");
         int len = jsonArray.length();
         for (int i = 0; i < len; i++) {
@@ -147,20 +147,15 @@ class FieldParser {
                 // DataProtectedBySignature
                 int counter = itemJso.getInt("counter");
                 JSONObject signatureJso = itemJso.getJSONObject("signature");
-                FileDataSignature signature = new FileDataSignature(
-                        fetchHexStringAndConvertToBytes(signatureJso, "startingSignature"),
-                        fetchHexStringAndConvertToBytes(signatureJso, "finalizingSignature")
-                );
-                DataToWrite.DataProtectedBySignature dpbs = new DataToWrite.DataProtectedBySignature(
-                        data,
-                        counter,
-                        signature,
-                        fetchHexStringAndConvertToBytes(itemJso, "issuerPublicKey")
-                );
+                FileDataSignature signature =
+                        new FileDataSignature(fetchHexStringAndConvertToBytes(signatureJso, "startingSignature"),
+                                fetchHexStringAndConvertToBytes(signatureJso, "finalizingSignature"));
+                FileData.DataProtectedBySignature dpbs = new FileData.DataProtectedBySignature(data, counter, signature,
+                        fetchHexStringAndConvertToBytes(itemJso, "issuerPublicKey"));
                 list.add(dpbs);
             } else {
                 // DataProtectedByPasscode
-                list.add(new DataToWrite.DataProtectedByPasscode(data));
+                list.add(new FileData.DataProtectedByPasscode(data));
             }
         }
         return list;
@@ -174,10 +169,8 @@ class FieldParser {
             if (!(item instanceof JSONObject)) continue;
 
             JSONObject itemJso = ((JSONObject) item);
-            FileSettingsChange fsc = new FileSettingsChange(
-                    itemJso.getInt("fileIndex"),
-                    FileSettings.Companion.byRawValue(itemJso.getInt("settings"))
-            );
+            FileSettingsChange fsc = new FileSettingsChange(itemJso.getInt("fileIndex"),
+                    FileSettings.Companion.byRawValue(itemJso.getInt("settings")));
             list.add(fsc);
         }
         return list;
