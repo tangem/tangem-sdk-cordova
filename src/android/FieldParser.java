@@ -26,7 +26,7 @@ class FieldParser {
     public static Message initialMessage(JSONObject jsO) throws JSONException {
         if (!jsO.has("initialMessage")) return null;
 
-        Object objMessage = jsO.opt("initialMessage");
+        Object objMessage = new JSONObject(jsO.opt("initialMessage").toString());
         if (objMessage == null || !(objMessage instanceof JSONObject)) return null;
 
         JSONObject jsMessage = ((JSONObject) objMessage);
