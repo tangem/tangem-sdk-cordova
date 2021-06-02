@@ -4,155 +4,151 @@ import TangemSdk
     private lazy var sdk: TangemSdk = {
         return TangemSdk()
     }()
-    
+
     override func pluginInitialize() {
     }
-    
+
     @objc(scanCard:) func scanCard(command: CDVInvokedUrlCommand) {
-        sdk.scanCard(onlineVerification: false,
-                     initialMessage: command.params?.getArg(.initialMessage),
-                     pin1: command.params?.getArg(.pin1)) {[weak self] result in
+        sdk.scanCard(initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
             self?.handleResult(result, callbackId: command.callbackId)
         }
     }
-    
+
     @objc(sign:) func sign(command: CDVInvokedUrlCommand) {
         let params = command.params
-        guard let hexHashes: [String] = params?.getArg(.hashes) else {
+        guard let hexHashes: [String] = params?.getArg(.hashes),
+              let walletPublicKey: Data = params?.getArg(.walletPublicKey) else {
             handleMissingArgs(callbackId: command.callbackId)
             return
         }
-        
+
         sdk.sign(hashes: hexHashes.compactMap({Data(hexString: $0)}),
-                 cardId: params?.getArg(.cid),
-                 initialMessage: params?.getArg(.initialMessage),
-                 pin1: command.params?.getArg(.pin1),
-                 pin2: command.params?.getArg(.pin2)) {[weak self] result in
-                    self?.handleResult(result, callbackId: command.callbackId)
+                 walletPublicKey: walletPublicKey,
+                 cardId: params?.getArg(.cardId),
+                 initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
+            switch result {
+            case .success(let signResponse):
+                let hexes = signResponse.map { $0.asHexString() }
+                self?.handleResult(.success(hexes), callbackId: command.callbackId)
+            case .failure(let error):
+                self?.handleResult(Result<[String], TangemSdkError>.failure(error), callbackId: command.callbackId)
+            }
         }
     }
-    
+
     @objc(readIssuerData:) func readIssuerData(command: CDVInvokedUrlCommand) {
-        sdk.readIssuerData(cardId: command.params?.getArg(.cid),
-                           initialMessage: command.params?.getArg(.initialMessage),
-                           pin1: command.params?.getArg(.pin1)) {[weak self] result in
+        sdk.readIssuerData(cardId: command.params?.getArg(.cardId),
+                           initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
                             self?.handleResult(result, callbackId: command.callbackId)
         }
     }
-    
+
     @objc(writeIssuerData:) func writeIssuerData(command: CDVInvokedUrlCommand) {
         let params = command.params
-        guard let cid: String = params?.getArg(.cid),
-            let issuerData: Data = params?.getArg(.issuerData),
+        guard let issuerData: Data = params?.getArg(.issuerData),
             let issuerDataSignature: Data = params?.getArg(.issuerDataSignature)  else {
                 handleMissingArgs(callbackId: command.callbackId)
                 return
         }
-        
-        let issuerDataCounter: Int? = params?.getArg(.issuerDataCounter)
-        sdk.writeIssuerData(cardId: cid,
-                            issuerData: issuerData,
+
+        sdk.writeIssuerData(issuerData: issuerData,
                             issuerDataSignature: issuerDataSignature,
-                            issuerDataCounter: issuerDataCounter,
-                            initialMessage: params?.getArg(.initialMessage),
-                            pin1: command.params?.getArg(.pin1)) {[weak self] result in
+                            issuerDataCounter: params?.getArg(.issuerDataCounter),
+                            cardId: params?.getArg(.cardId),
+                            initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
                                 self?.handleResult(result, callbackId: command.callbackId)
         }
     }
 
     @objc(readIssuerExtraData:) func readIssuerExtraData(command: CDVInvokedUrlCommand) {
         sdk.readIssuerExtraData(cardId: command.params?.getArg(.pin1),
-                                initialMessage: command.params?.getArg(.initialMessage),
-                                pin1: command.params?.getArg(.pin1)) {[weak self] result in
+                                initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
                                     self?.handleResult(result, callbackId: command.callbackId)
         }
     }
-    
+
     @objc(writeIssuerExtraData:) func writeIssuerExtraData(command: CDVInvokedUrlCommand) {
         let params = command.params
-        guard let cid: String = params?.getArg(.cid),
-            let issuerData: Data = params?.getArg(.issuerData),
+        guard let issuerData: Data = params?.getArg(.issuerData),
             let startingSignature: Data = params?.getArg(.startingSignature),
             let finalizingSignature: Data = params?.getArg(.finalizingSignature) else {
                 handleMissingArgs(callbackId: command.callbackId)
                 return
         }
-        
-        sdk.writeIssuerExtraData(cardId: cid,
-                                 issuerData: issuerData,
+
+        sdk.writeIssuerExtraData(issuerData: issuerData,
                                  startingSignature: startingSignature,
                                  finalizingSignature: finalizingSignature,
                                  issuerDataCounter: params?.getArg(.issuerDataCounter),
-                                 initialMessage: params?.getArg(.initialMessage),
-                                 pin1: command.params?.getArg(.pin1)) {[weak self] result in
+                                 cardId: params?.getArg(.cardId),
+                                 initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
                                     self?.handleResult(result, callbackId: command.callbackId)
         }
     }
-    
+
     @objc(readUserData:) func readUserData(command: CDVInvokedUrlCommand) {
-        sdk.readUserData(cardId: command.params?.getArg(.cid),
-                         initialMessage: command.params?.getArg(.initialMessage),
-                         pin1: command.params?.getArg(.pin1)) {[weak self] result in
+        sdk.readUserData(cardId: command.params?.getArg(.cardId),
+                         initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
                             self?.handleResult(result, callbackId: command.callbackId)
         }
     }
-    
+
     @objc(writeUserData:) func writeUserData(command: CDVInvokedUrlCommand) {
         let params = command.params
         guard let userData: Data = params?.getArg(.userData) else {
             handleMissingArgs(callbackId: command.callbackId)
             return
         }
-        
-        sdk.writeUserData(cardId: params?.getArg(.cid),
-                          userData: userData,
+
+        sdk.writeUserData(userData: userData,
                           userCounter: params?.getArg(.userCounter),
-                          initialMessage: params?.getArg(.initialMessage),
-                          pin1: command.params?.getArg(.pin1)) {[weak self] result in
+                          cardId: params?.getArg(.cardId),
+                          initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
                             self?.handleResult(result, callbackId: command.callbackId)
         }
     }
-    
+
     @objc(writeUserProtectedData:) func writeUserProtectedData(command: CDVInvokedUrlCommand) {
         let params = command.params
-        guard let cid: String = params?.getArg(.cid),
-            let userProtectedData: Data = params?.getArg(.userProtectedData) else {
+        guard let userProtectedData: Data = params?.getArg(.userProtectedData) else {
                 handleMissingArgs(callbackId: command.callbackId)
                 return
         }
-        
-        sdk.writeUserProtectedData(cardId: cid,
-                                   userProtectedData: userProtectedData,
+
+        sdk.writeUserProtectedData(userProtectedData: userProtectedData,
                                    userProtectedCounter: params?.getArg(.userProtectedCounter),
-                                   initialMessage: params?.getArg(.initialMessage),
-                                   pin1: command.params?.getArg(.pin1)) {[weak self] result in
+                                   cardId: params?.getArg(.cardId),
+                                   initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
                                     self?.handleResult(result, callbackId: command.callbackId)
         }
     }
-    
+
     @objc(createWallet:) func createWallet(command: CDVInvokedUrlCommand) {
-        sdk.createWallet(cardId: command.params?.getArg(.cid),
-                         initialMessage: command.params?.getArg(.initialMessage),
-                         pin1: command.params?.getArg(.pin1),
-                         pin2: command.params?.getArg(.pin2)) {[weak self] result in
+        let config: WalletConfigWrapper? = command.params?.getArg(.config)
+        sdk.createWallet(config: config.map { $0.walletConfig }, cardId: command.params?.getArg(.cardId),
+                         initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
                             self?.handleResult(result, callbackId: command.callbackId)
         }
     }
-    
+
     @objc(purgeWallet:) func purgeWallet(command: CDVInvokedUrlCommand) {
-        sdk.purgeWallet(cardId: command.params?.getArg(.cid),
-                        initialMessage: command.params?.getArg(.initialMessage),
-                        pin1: command.params?.getArg(.pin1),
-                        pin2: command.params?.getArg(.pin2)) {[weak self] result in
+        let params = command.params
+        guard let walletPublicKey: Data = params?.getArg(.walletPublicKey) else {
+            handleMissingArgs(callbackId: command.callbackId)
+            return
+        }
+        sdk.purgeWallet(walletPublicKey: walletPublicKey,
+                        cardId: params?.getArg(.cardId),
+                        initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
                             self?.handleResult(result, callbackId: command.callbackId)
         }
     }
-    
+
     @objc(changePin1:) func changePin1(command: CDVInvokedUrlCommand)  {
         let pin: String? = command.params?.getArg(.pinCode)
-        
-        sdk.changePin1(cardId: command.params?.getArg(.cid),
-                       pin: pin?.sha256(),
+
+        sdk.changePin1(pin: pin?.sha256(),
+                       cardId: command.params?.getArg(.cardId),
                        initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
                         self?.handleResult(result, callbackId: command.callbackId)
         }
@@ -160,87 +156,79 @@ import TangemSdk
 
     @objc(changePin2:) func changePin2(command: CDVInvokedUrlCommand) {
         let pin: String? = command.params?.getArg(.pinCode)
-        
-        sdk.changePin2(cardId: command.params?.getArg(.cid),
-                       pin: pin?.sha256(),
+
+        sdk.changePin2(pin: pin?.sha256(),
+                       cardId: command.params?.getArg(.cardId),
+
                        initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
                         self?.handleResult(result, callbackId: command.callbackId)
         }
     }
-    
+
     @objc(verify:) func verify(command: CDVInvokedUrlCommand) {
         if let online: Bool = command.params?.getArg(.online) {
-            sdk.verify(cardId: command.params?.getArg(.cid),
-                       online: online,
-                       initialMessage: command.params?.getArg(.initialMessage),
-                       pin1: command.params?.getArg(.pin1)) { [weak self] result in
+            sdk.verify(online: online,
+                       cardId: command.params?.getArg(.cardId),
+                       initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
                         self?.handleResult(result, callbackId: command.callbackId) }
         } else {
-            sdk.verify(cardId: command.params?.getArg(.cid),
-                       initialMessage: command.params?.getArg(.initialMessage),
-                       pin1: command.params?.getArg(.pin1)) { [weak self] result in
+            sdk.verify(cardId: command.params?.getArg(.cardId),
+                       initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
                         self?.handleResult(result, callbackId: command.callbackId)
             }
         }
     }
-    
+
     @objc(readFiles:) func readFiles(command: CDVInvokedUrlCommand) {
         let readPrivateFiles: Bool = command.params?.getArg(.readPrivateFiles) ?? false
-        sdk.readFiles(cardId: command.params?.getArg(.cid),
-                      initialMessage: command.params?.getArg(.initialMessage),
-                      pin1: command.params?.getArg(.pin1),
-                      pin2: command.params?.getArg(.pin2),
-                      readSettings: ReadFilesTaskSettings(readPrivateFiles: readPrivateFiles)) { [weak self] result in
+        sdk.readFiles(readPrivateFiles: readPrivateFiles,
+                      indices: command.params?.getArg(.indices),
+                      cardId: command.params?.getArg(.cardId),
+                      initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
             self?.handleResult(result, callbackId: command.callbackId)
         }
     }
-    
+
     @objc(writeFiles:) func writeFiles(command: CDVInvokedUrlCommand) {
         guard let fileWrappers: [FileDataWrapper] = command.params?.getArg(.files) else {
             handleMissingArgs(callbackId: command.callbackId)
             return
         }
-        
-        sdk.writeFiles(cardId: command.params?.getArg(.cid),
-                       initialMessage: command.params?.getArg(.initialMessage),
-                       pin1: command.params?.getArg(.pin1),
-                       pin2: command.params?.getArg(.pin2),
-                       files: fileWrappers.map { $0.dataToWrite }) { [weak self] result in
+
+        sdk.writeFiles(files: fileWrappers.map { $0.dataToWrite },
+                       cardId: command.params?.getArg(.cardId),
+                       initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
             self?.handleResult(result, callbackId: command.callbackId)
         }
     }
-    
+
     @objc(deleteFiles:) func deleteFiles(command: CDVInvokedUrlCommand) {
-        sdk.deleteFiles(cardId: command.params?.getArg(.cid),
-                        initialMessage: command.params?.getArg(.initialMessage),
-                        pin1: command.params?.getArg(.pin1),
-                        pin2: command.params?.getArg(.pin2),
-                        indicesToDelete: command.params?.getArg(.indices)) { [weak self] result in
+        sdk.deleteFiles(indicesToDelete: command.params?.getArg(.indices),
+                        cardId: command.params?.getArg(.cardId),
+                        initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
             self?.handleResult(result, callbackId: command.callbackId)
         }
     }
-    
+
     @objc(changeFilesSettings:) func changeFilesSettings(command: CDVInvokedUrlCommand) {
         guard let changes: [FileSettingsChangeWrapper] = command.params?.getArg(.changes) else {
             handleMissingArgs(callbackId: command.callbackId)
             return
         }
-        
-        sdk.changeFilesSettings(cardId: command.params?.getArg(.cid),
-                                initialMessage: command.params?.getArg(.initialMessage),
-                                pin1: command.params?.getArg(.pin1),
-                                pin2: command.params?.getArg(.pin2),
-                                files: changes.map { $0.file }) { [weak self] result in
+
+        sdk.changeFilesSettings(changes: changes.map { $0.fileSettingsChange },
+                                cardId: command.params?.getArg(.cardId),
+                                initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
             self?.handleResult(result, callbackId: command.callbackId)
         }
     }
-    
+
     private func handleMissingArgs(callbackId: String) {
         let missingArgsError = PluginError(code: 9999, localizedDescription: "Some arguments are missing or wrong")
         let errorResult = CDVPluginResult(status: .error, messageAs:  missingArgsError.jsonDescription)
         commandDelegate.send(errorResult, callbackId: callbackId)
     }
-    
+
     private func handleResult<TResult: JSONStringConvertible>(_ result: Result<TResult, TangemSdkError>, callbackId: String) {
         var cdvresult: CDVPluginResult
         switch result {
@@ -262,7 +250,7 @@ fileprivate extension CDVInvokedUrlCommand {
 fileprivate enum ArgKey: String {
     case pin1
     case pin2
-    case cid
+    case cardId
     case hashes
     case userCounter
     case userProtectedCounter
@@ -285,6 +273,8 @@ fileprivate enum ArgKey: String {
     case readPrivateFiles
     case indices
     case changes
+    case walletPublicKey
+    case config
 }
 
 fileprivate extension Dictionary where Key == String, Value == Any {
@@ -307,7 +297,7 @@ fileprivate extension Dictionary where Key == String, Value == Any {
             return nil
         }
     }
-    
+
     private func decodeObject<T: Decodable>(_ value: Any) -> T? {
         if let json = value as? String, let jsonData = json.data(using: .utf8) {
             do {
@@ -331,7 +321,7 @@ fileprivate extension Dictionary where Key == String, Value == Any {
 fileprivate struct PluginError: Encodable {
     let code: Int
     let localizedDescription: String
-    
+
     var jsonDescription: String {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
@@ -351,7 +341,7 @@ fileprivate struct FileDataWrapper: Codable {
     let counter: Int?
     let signature: FileDataSignature?
     let issuerPublicKey: String?
-    
+
     var dataToWrite: DataToWrite {
         let data = self.data.toData()
         if let counter = counter, let signature = signature {
@@ -380,10 +370,19 @@ fileprivate extension String {
 fileprivate struct FileSettingsChangeWrapper: Codable {
     let fileIndex: Int
     let settings: Int
-    
-    var file: File {
-        File(fileIndex: fileIndex,
-             fileSettings: FileSettings(rawValue: settings),
-             fileData: Data())
+
+    var fileSettingsChange: FileSettingsChange {
+        FileSettingsChange(fileIndex: fileIndex, settings: FileSettings(rawValue: settings)!)
+    }
+}
+
+fileprivate struct WalletConfigWrapper: Codable {
+    let isReusable: Bool?
+    let prohibitPurgeWallet: Bool?
+    let curveId: String?
+    let signingMethods: SigningMethod?
+
+    var walletConfig: WalletConfig {
+        WalletConfig(isReusable: isReusable, prohibitPurgeWallet: prohibitPurgeWallet, curveId: (curveId != nil) ?  EllipticCurve(rawValue: curveId!) : nil, signingMethods: signingMethods)
     }
 }

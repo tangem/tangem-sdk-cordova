@@ -137,18 +137,20 @@ When calling basic methods, there is no need to show the error to the user, sinc
 #### Scan card
 Method `tangemSdk.scanCard()` is needed to obtain information from the Tangem card. Optionally, if the card contains a wallet (private and public key pair), it proves that the wallet owns a private key that corresponds to a public one.
 
+**Arguments:**
+
+| Parameter | Description |
+| ------------ | ------------ |
+| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
+| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
+
 ```js
-var cid = "bb03000000000004";
-var callback = {
-  success: function(result) {
-    console.log("result: " + JSON.stringify(result));
-  },
-  error: function(error) {
-    console.log("error: " + JSON.stringify(error));
-  }
+var initialMessage = { body: 'Body', header: 'Header' }; 
+function callback(result, error) {
+  console.log(error ? 'error: ' + JSON.stringify(error): 'result: ' + JSON.stringify(result));
 }
 
-TangemSdk.scanCard(callback);
+TangemSdk.scanCard(initialMessage, callback);
 ```
 
 #### Sign
@@ -158,59 +160,74 @@ Method `tangemSdk.sign()` allows you to sign one or multiple hashes. The SIGN co
 
 | Parameter | Description |
 | ------------ | ------------ |
-| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
 | hashes | Array of hashes to be signed by card |
+| walletPublicKey | Public key of wallet that should be purged. |
+| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
+| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
+| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
+
 
 ```js
-var cid = "bb03000000000004";
-var callback = {
-  success: function(result) {
-    console.log("result: " + JSON.stringify(result));
-  },
-  error: function(error) {
-    console.log("error: " + JSON.stringify(error));
-  }
+var hashes = [
+  '44617461207573656420666f722068617368696e67',
+  '4461746120666f7220757365642068617368696e67'
+];
+var walletPublicKey = '04C1E394BF9873331E296268290F79FF96DE3F97703C96AA7B2A7037AF6AB4FE0FB35E3DAD8FD4374C227A793105ED6617F289B0314B105CDDE20BF1F2A692E42B';
+var cardId = 'CB41000000004271';
+var initialMessage = { body: 'Body', header: 'Header' };
+function callback(result, error) {
+	console.log(error ? 'error: ' + JSON.stringify(error): 'result: ' + JSON.stringify(result));
 }
 
-TangemSdk.sign(callback, cid, [
-                "44617461207573656420666f722068617368696e67",
-                "4461746120666f7220757365642068617368696e67"
-            ]);
+TangemSdk.sign(hashes, walletPublicKey, cardId, initialMessage, callback);
 ```
 
 #### Wallet
 ##### Create Wallet
 Method `tangemSdk.createWallet()` will create a new wallet on the card. A key pair `WalletPublicKey` / `WalletPrivateKey` is generated and securely stored in the card.
 
+**Arguments:**
+
+| Parameter | Description |
+| ------------ | ------------ |
+| config | *(Optional)* Configuration for wallet that should be created (blockchain name, token...). This parameter available for cards with COS v.4.0 and higher. For earlier versions it will be ignored |
+| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
+| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
+| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
+
 ```js
-var cid = "bb03000000000004";
-var callback = {
-  success: function(result) {
-    console.log("result: " + JSON.stringify(result));
-  },
-  error: function(error) {
-    console.log("error: " + JSON.stringify(error));
-  }
+var congig = {isReusable: true, prohibitPurgeWallet: true, EllipticCurve: 'secp256k1'};
+var cardId = 'CB41000000004271';
+var initialMessage = { body: 'Body', header: 'Header' };
+function callback(result, error) {
+  console.log(error ? 'error: ' + JSON.stringify(error): 'result: ' + JSON.stringify(result));
 }
 
-TangemSdk.createWallet(callback, cid);
+TangemSdk.createWallet(config, cardId, initialMessage, callback);
 ```
 
 ##### Purge Wallet
-Method `tangemSdk.purgeWallet()` deletes all wallet data.
+Method `tangemSdk.purgeWallet()` delete wallet data.
+
+**Arguments:**
+
+| Parameter | Description |
+| ------------ | ------------ |
+| walletPublicKey | Public key of wallet that should sign hashes. |
+| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
+| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
+| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
+
 
 ```js
-var cid = "bb03000000000004";
-var callback = {
-  success: function(result) {
-    console.log("result: " + JSON.stringify(result));
-  },
-  error: function(error) {
-    console.log("error: " + JSON.stringify(error));
-  }
+var walletPublicKey = '04C1E394BF9873331E296268290F79FF96DE3F97703C96AA7B2A7037AF6AB4FE0FB35E3DAD8FD4374C227A793105ED6617F289B0314B105CDDE20BF1F2A692E42B';
+var cardId = 'CB41000000004271';
+var initialMessage = { body: 'Body', header: 'Header' };
+function callback(result, error) {
+	console.log(error ? 'error: ' + JSON.stringify(error): 'result: ' + JSON.stringify(result));
 }
 
-TangemSdk.purgeWallet(callback, cid);
+TangemSdk.purgeWallet (walletPublicKey, cardId, initialMessage, callback);
 ```
 
 #### Issuer data
@@ -225,91 +242,82 @@ Method `tangemSdk.writeIssuerData(cardId: cardId,issuerData: sampleData, issuerD
 
 | Parameter | Description |
 | ------------ | ------------ |
-| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
 | issuerData | Data to be written to the card |
 | issuerDataSignature | Issuer’s signature of issuerData with `Issuer_Data_PrivateKey` |
 | issuerDataCounter | An optional counter that protect issuer data against replay attack. When flag Protect_Issuer_Data_Against_Replay set in the card configuration then this value is mandatory and must increase on each execution of `writeIssuerData` command.  |
+| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
+| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
+| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
 
 ```js
-var cid = "bb03000000000004";
-var callback = {
-  success: function(result) {
-    console.log("result: " + JSON.stringify(result));
-  },
-  error: function(error) {
-    console.log("error: " + JSON.stringify(error));
-  }
-}
-
-TangemSdk.writeIssuerData(callback, cid,
-                "issuerData",
-                "issuerDataSignature",
-                { issuerDataCounter: 1 }
-            );
+TangemSdk.writeIssuerData(
+  issuerData, 
+  issuerDataSignature,
+  issuerDataCounter,
+  cardId,
+  initialMessage,
+  callback
+);
 ```
 
 ##### Write issuer extra data
 If 512 bytes are not enough, you can use method `tangemSdk.writeIssuerExtraData(cardId: cardId, issuerData: sampleData,startingSignature: startSignature,finalizingSignature: finalSig,issuerDataCounter: newCounter)` to save up to 40 kylobytes.
 
+**Arguments:**
+
 | Parameter | Description |
 | ------------ | ------------ |
-| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
 | issuerData | Data to be written to the card |
 | startingSignature | Issuer’s signature of `SHA256(cardId | Size)` or `SHA256(cardId | Size | issuerDataCounter)` with `Issuer_Data_PrivateKey` |
 | finalizingSignature | Issuer’s signature of `SHA256(cardId | issuerData)` or or `SHA256(cardId | issuerData | issuerDataCounter)` with `Issuer_Data_PrivateKey` |
 | issuerDataCounter | An optional counter that protect issuer data against replay attack. When flag Protect_Issuer_Data_Against_Replay set in the card configuration then this value is mandatory and must increase on each execution of `writeIssuerData` command.  |
+| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
+| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
+| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
 
 ```js
-var cid = "bb03000000000004";
-var callback = {
-  success: function(result) {
-    console.log("result: " + JSON.stringify(result));
-  },
-  error: function(error) {
-    console.log("error: " + JSON.stringify(error));
-  }
-}
 
-TangemSdk.writeIssuerExtraData(callback, cid,
-                "data",
-                "startingSignature",
-                "finalizingSignature",
-                { issuerDataCounter: 0 }
-            );
+TangemSdk.writeIssuerExtraData(
+  issuerData, 
+  startingSignature,
+  finalizingSignature,
+  issuerDataCounter,
+  cardId,
+  initialMessage,
+  callback
+);
 ```
 
 ##### Read issuer data
 Method `tangemSdk.readIssuerData()` returns 512-byte Issuer_Data field and its issuer’s signature.
 
-```js
-var cid = "bb03000000000004";
-var callback = {
-  success: function(result) {
-    console.log("result: " + JSON.stringify(result));
-  },
-  error: function(error) {
-    console.log("error: " + JSON.stringify(error));
-  }
-}
+**Arguments:**
 
-TangemSdk.readUserData(callback, cid);
+| Parameter | Description |
+| ------------ | ------------ |
+| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
+| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
+| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
+
+```js
+TangemSdk.readUserData(cardId, initialMessage, callback);
 ```
 
 ##### Read issuer extra data
 Method `tangemSdk.readIssuerExtraData()` ruturns Issuer_Extra_Data field.
 
-```js
-var cid = "bb03000000000004";
-var callback = {
-  success: function(result) {
-    console.log("result: " + JSON.stringify(result));
-  },
-  error: function(error) {
-    console.log("error: " + JSON.stringify(error));
-  }
-}
+**Arguments:**
 
-TangemSdk.readIssuerData(callback, cid);
+| Parameter | Description |
+| ------------ | ------------ |
+| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
+| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
+| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
+
+
+```js
+
+TangemSdk.readIssuerData(cardId, initialMessage, callback);
 ```
 
 #### User data
@@ -317,76 +325,84 @@ TangemSdk.readIssuerData(callback, cid);
 Method `tangemSdk.writeUserData()` write some of User_Data and User_Counter fields.
 User_Data is never changed or parsed by the executable code the Tangem COS. The App defines purpose of use, format and it's payload. For example, this field may contain cashed information from blockchain to accelerate preparing new transaction.
 
+**Arguments:**
+
 | Parameter | Description |
 | ------------ | ------------ |
+| userData | User data |
+| userCounter | Counters, that initial values can be set by App and increased on every signing of new transaction (on SIGN command that calculate new signatures). The App defines purpose of use. For example, this fields may contain blockchain nonce value. |
 | cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
-| User_Data | User data |
-| User_Counter | Counters, that initial values can be set by App and increased on every signing of new transaction (on SIGN command that calculate new signatures). The App defines purpose of use. For example, this fields may contain blockchain nonce value. |
+| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
+| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
 
 ```js
-var cid = "bb03000000000004";
-var callback = {
-  success: function(result) {
-    console.log("result: " + JSON.stringify(result));
-  },
-  error: function(error) {
-    console.log("error: " + JSON.stringify(error));
-  }
-}
+TangemSdk.writeUserData(userData, userCounter, cardId, initialMessage, callback)
+```
 
-TangemSdk.writeUserProtectedData(callback, cid,
-                "any data", { userProtectedCounter: 0 });
+**Arguments:**
+
+| Parameter | Description |
+| ------------ | ------------ |
+| userProtectedData | User data |
+| userProtectedCounter | Counter initialized by user’s App (confirmed by PIN2) and increased on every signing of new transaction. |
+| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
+| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
+| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
+
+```js
+TangemSdk.writeUserProtectedData(
+  userProtectedData, 
+  userProtectedCounter, 
+  cardId, 
+  initialMessage, 
+  callback
+);
 ```
 
 ##### Read user data
 Method `tangemSdk.readUserData()` returns User Data
 
-```js
-var cid = "bb03000000000004";
-var callback = {
-  success: function(result) {
-    console.log("result: " + JSON.stringify(result));
-  },
-  error: function(error) {
-    console.log("error: " + JSON.stringify(error));
-  }
-}
+**Arguments:**
 
-TangemSdk.readIssuerData(callback, cid);
+| Parameter | Description |
+| ------------ | ------------ |
+| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
+| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
+| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
+
+```js
+TangemSdk.readIssuerData(cardId, initialMessage, callback);
 ```
 
 #### Pin codes
 *Access code (PIN1)* restricts access to the whole card. App must submit the correct value of Access code in each command. 
 *Passcode (PIN2)* is required to sign a transaction or to perform some other commands entailing a change of the card state.
 
-```js
-var cid = "bb03000000000004";
-var callback = {
-  success: function(result) {
-    console.log("result: " + JSON.stringify(result));
-  },
-  error: function(error) {
-    console.log("error: " + JSON.stringify(error));
-  }
-}
+**Arguments:**
 
-TangemSdk.changePin1(callback, cid);
-//TangemSdk.changePin2(callback, cid);
+| Parameter | Description |
+| ------------ | ------------ |
+| pin | Pin data |
+| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
+| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
+| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
+
+```js
+TangemSdk.changePin1(pin, cardId, initialMessage, callback);
+TangemSdk.changePin2(pin, cardId, initialMessage, callback);
 ```
 ### Card attestation
 #### Card verification
 This command is a part of Tangem card attestation. In manufacturing, every new Tangem card internally generates a Card Key pair Card Public Key / Card Private Key. The private key is permanently stored in the card memory and is not accessible to external applications via the NFC interface. At the same time, Tangem publishes the list of CID and corresponding Card Public Key values in its card attestation service and/or hands over this list to the Card Issuer.
 
-```js
-var cid = "bb03000000000004";
-var callback = {
-  success: function(result) {
-    console.log("result: " + JSON.stringify(result));
-  },
-  error: function(error) {
-    console.log("error: " + JSON.stringify(error));
-  }
-}
+**Arguments:**
 
-TangemSdk.verify(callback, cid, true);
+| Parameter | Description |
+| ------------ | ------------ |
+| online | Flag that allows disable online verification. Do not use for developer cards
+| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
+| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
+| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
+```js
+TangemSdk.verify(pin, cardId, initialMessage, callback);
 ```

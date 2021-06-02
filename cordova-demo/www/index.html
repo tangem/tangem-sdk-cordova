@@ -1,89 +1,270 @@
 <!DOCTYPE html>
-<!--
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-     KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
--->
 <html>
     <head>
-        <!--
-        Customize this policy to fit your own app's needs. For more guidance, see:
-            https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
-        Some notes:
-            * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
-            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
-            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
-                * Enable inline JS: add 'unsafe-inline' to default-src
-        -->
         <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
-        <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+        <meta name="viewport" content="initial-scale=1,  width=device-width, viewport-fit=cover, minimum-scale=1, maximum-scale=1">
         <link rel="stylesheet" type="text/css" href="css/index.css">
-        <title>Hello World</title>
+        <title>Tangem Cordova</title>
     </head>
     <body>
-        <div class="app">
-            <h1>Apache Cordova</h1>
-            <div id="deviceready" class="blink">
-                <p class="event listening">Connecting to Device</p>
-                <p class="event received">Device is Ready</p>
-            </div>
+        <div id="splashScreen">
+            <h1>Tangem Cordova</h1>
+        </div>
+        <div id="app" style="display:">
+            <section>
+                <h2>Scan Card</h2>
+                <form class="request">
+                    <label for="messageHeader">Header</label>
+                    <input type="text" id="messageHeader" value="Header of message"/>
+                    <label for="messageBody">Body</label>
+                    <input type="text" class="" id="messageBody" value="Body of message"/>
+                </form>
+                <form class="response">
+                    <label for="taScanCard">Response:</label>
+                    <textarea id="taScanCard"></textarea>
+                </form>
+                <button id="buttonScanCard" type="button">Scan Card</button>
+            </section>
 
-            <br><br><br>
+            <section>
+                <h2>Sign</h2>
+                <form class="request">
+                    <label for="hash1">Hash 1</label>
+                    <input type="text" id="hash1" value="44617461207573656420666f722068617368696e67"/>
+                    <label for="hash2">Hash 2</label>
+                    <input type="text" id="hash2" value="4461746120666f7220757365642068617368696e67"/>
+                    <label for="hash3">Hash 3</label>
+                    <input type="text" id="hash3"/>
+                    <label for="signWalletPublicKey">Wallet Public Key</label>
+                    <input type="text" class="walletPublicKey" id="signWalletPublicKey"/>
+                    <label for="signCardId">Cadr Id</label>
+                    <input type="text" class="cardId" id="signCardId"/>
+                </form>
+                <form class="response">
+                    <label for="taSign">Response:</label>
+                    <textarea id="taSign"></textarea>
+                </form>
+                <button id="buttonSign" type="button">Sign</button>
+            </section>
 
-            <button id="btn_scanCard">Scan card</button> &nbsp
-            <button id="btn_sign">Sign</button> &nbsp
-            <button id="btn_verify">Verify</button>
-            <br><br>
+            <section>
+                <h2>Verify</h2>
+                <form class="request">
+                    <label>Online
+                        <input type="checkbox" id="onlineVerify" checked value="online">
+                    </label>
+                </form>
+                <form class="response">
+                    <label for="taVerify">Response:</label>
+                    <textarea id="taVerify"></textarea>
+                </form>
+                <button id="buttonVerify" type="button">Verify</button>
+            </section>
 
-            <p>Issuer data</p>
-            <button id="btn_read_issuer_data">Read</button> &nbsp
-            <button id="btn_write_issuer_data">Write</button>
-            <br><br><br>
+            <section>
+                <h2>Create Wallet</h2>
+                <form class="request">
 
-            <p>Issuer extra data</p>
-            <button id="btn_read_issuer_extra_data">Read</button> &nbsp
-            <button id="btn_write_issuer_extra_data">Write</button>
-            <br><br>
+                </form>
+                <form class="response">
+                    <label for="taCreateWallet">Response:</label>
+                    <textarea id="taCreateWallet"></textarea>
+                </form>
+                <button id="buttonCreateWallet" type="button">Create Wallet</button>
+            </section>
 
-            <p>User data</p>
-            <button id="btn_read_user_data">Read (all)</button>
-            <br><br>
-            <button id="btn_write_user_data">Write data</button> &nbsp
-            <button id="btn_write_user_protected_data">Write protected data</button>
-            <br><br>
+            <section>
+                <h2>Purge Wallet</h2>
+                <form class="request">
+                    <label for="purgeWalletPublicKey">WalletPublicKey</label>
+                    <input type="text" class="walletPublicKey" id="purgeWalletPublicKey"/>
+                </form>
+                <form class="response">
+                    <label for="taPurgeWallet">Response:</label>
+                    <textarea id="taPurgeWallet"></textarea>
+                </form>
+                <button id="buttonPurgeWallet" type="button">Purge Wallet</button>
+            </section>
 
-            <p>Wallet</p>
-            <button id="btn_create_wallet">Create</button>  &nbsp
-            <button id="btn_purge_wallet">Purge</button>
-            <br><br>
+            <section>
+                <h2>Read issuer data</h2>
+                <form class="request">
 
-            <p>Pins</p>
-            <button id="btn_change_pin1">Change PIN1</button>  &nbsp
-            <button id="btn_change_pin2">Change PIN2</button>
-            <br><br>
+                </form>
+                <form class="response">
+                    <label for="taReadIssuerData">Response:</label>
+                    <textarea id="taReadIssuerData"></textarea>
+                </form>
+                <button id="buttonReadIssuerData" type="button">Read issuer data</button>
+            </section>
 
-            <p>Files</p>
-            <button id="btn_files_read">Read</button>  &nbsp
-            <button id="btn_files_write">Write</button>  &nbsp
-            <button id="btn_files_delete">Delete</button>
-            <br><br>
-            <button id="btn_files_change_settings">Change settings</button>
+            <section>
+                <h2>Write issuer data</h2>
+                <form class="request">
+                    <label for="IssuerData">Issuer Data</label>
+                    <input type="text" id="IssuerData" value="4461746120746f206265207772697474656e206f6e20612063617264206173206973737565722064617461"/>
+                    <label for="issuerDataSignature">Issuer Data Signature</label>
+                    <input type="text" id="issuerDataSignature"/>
+                </form>
+                <form class="response">
+                    <label for="taWriteIssuerData">Response:</label>
+                    <textarea id="taWriteIssuerData"></textarea>
+                </form>
+                <button id="buttonWriteIssuerData" type="button">Write issuer data</button>
+            </section>
 
+            <section>
+                <h2>Read issuer extra data</h2>
+                <form class="request">
+
+                </form>
+                <form class="response">
+                    <label for="taReadIssuerExtraData">Response:</label>
+                    <textarea id="taReadIssuerExtraData"></textarea>
+                </form>
+                <button id="buttonReadIssuerExtraData" type="button">Read issuer extra data</button>
+            </section>
+
+            <section>
+                <h2>Write issuer extra data</h2>
+                <form class="request">
+                    <label for="IssuerExtraData">Issuer Extra Data</label>
+                    <input type="text" id="IssuerExtraData" value=""/>
+                    <label for="issuerExtraDataStartingSignature">Issuer Extra Data Starting Signature</label>
+                    <input type="text" id="issuerExtraDataStartingSignature" value=""/>
+                    <label for="issuerExtraDataFinalizingSignature">Issuer Extra Data Finalizing Signature</label>
+                    <input type="text" id="issuerExtraDataFinalizingSignature" value=""/>
+                </form>
+                <form class="response">
+                    <label for="taWriteIssuerExtraData">Response:</label>
+                    <textarea id="taWriteIssuerExtraData"></textarea>
+                </form>
+                <button id="buttonWriteIssuerExtraData" type="button">Write issuer extra data</button>
+            </section>
+
+            <section>
+                <h2>Read user data</h2>
+                <form class="request">
+
+                </form>
+                <form class="response">
+                    <label for="taReadUserData">Response:</label>
+                    <textarea id="taReadUserData"></textarea>
+                </form>
+                <button id="buttonReadUserData" type="button">Read user data</button>
+            </section>
+            <section>
+                <h2>Write user data</h2>
+                <form class="request">
+                    <label for="userData">User Data</label>
+                    <input type="text" id="userData" value="44617461207573656420666f722068617368696e67"/>
+                    <label for="userDataCounter">User Data Counter</label>
+                    <input type="number" id="userDataCounter" value="0"/>
+                </form>
+                <form class="response">
+                    <label for="taWriteUserData">Response:</label>
+                    <textarea id="taWriteUserData"></textarea>
+                </form>
+                <button id="buttonWriteUserData" type="button">Write user data</button>
+            </section>
+
+            <section>
+                <h2>Write user protected data</h2>
+                <form class="request">
+                    <label for="userProtectedData">User Protected Data</label>
+                    <input type="text" id="userProtectedData" value="44617461207573656420666f722068617368696e67"/>
+                    <label for="userProtectedDataCounter">User Protected Data Counter</label>
+                    <input type="number" id="userProtectedDataCounter" value="0"/>
+                </form>
+                <form class="response">
+                    <label for="taWriteUserProtectedData">Response:</label>
+                    <textarea id="taWriteUserProtectedData"></textarea>
+                </form>
+                <button id="buttonWriteUserProtectedData" type="button">Write user protected data</button>
+            </section>
+
+            <section>
+                <h2>Change Pin1</h2>
+                <form class="request">
+                    <label for="pin1">Pin 1</label>
+                    <input type="text" id="pin1" value=""/>
+                </form>
+                <form class="response">
+                    <label for="taChangePin1">Response:</label>
+                    <textarea id="taChangePin1"></textarea>
+                </form>
+                <button id="buttonChangePin1" type="button">Change Pin1</button>
+            </section>
+
+            <section>
+                <h2>Change Pin2</h2>
+                <form class="request">
+                    <label for="pin2">Pin 2</label>
+                    <input type="text" id="pin2" value=""/>
+                </form>
+                <form class="response">
+                    <label for="taChangePin2">Response:</label>
+                    <textarea id="taChangePin2"></textarea>
+                </form>
+                <button id="buttonChangePin2" type="button">Change Pin2</button>
+            </section>
+
+            <section>
+                <h2>Read files</h2>
+                <form class="request">
+                    <label>Read private files
+                        <input type="checkbox" id="ReadPrivateFiles" checked value="read private files">
+                    </label>
+                </form>
+                <form class="response">
+                    <label for="taReadFiles">Response:</label>
+                    <textarea id="taReadFiles"></textarea>
+                </form>
+                <button id="buttonReadFiles" type="button">Read files</button>
+            </section>
+
+            <section>
+                <h2>Write files</h2>
+                <form class="request">
+
+                </form>
+                <form class="response">
+                    <label for="taWriteFiles">Response:</label>
+                    <textarea id="taWriteFiles"></textarea>
+                </form>
+                <button id="buttonWriteFiles" type="button">Write files</button>
+            </section>
+
+            <section>
+                <h2>Delete files</h2>
+                <form class="request">
+                    <label for="DeleteFileIndex">Delete file index</label>
+                    <input type="number" id="DeleteFileIndex" value="0"/>
+                </form>
+                <form class="response">
+                    <label for="taDeleteFiles">Response:</label>
+                    <textarea id="taDeleteFiles"></textarea>
+                </form>
+                <button id="buttonDeleteFiles" type="button">Delete files</button>
+            </section>
+
+            <section>
+                <h2>Change files settings</h2>
+                <form class="request">
+                    <label for="ChangeFileIndex">Delete file index</label>
+                    <input type="number" id="ChangeFileIndex" value="0"/>
+                    <label>Read private files
+                        <input type="checkbox" id="ChangeFilePrivate" checked value="Private">
+                    </label>
+                </form>
+                <form class="response">
+                    <label for="taChangeFilesSettings">Response:</label>
+                    <textarea id="taChangeFilesSettings"></textarea>
+                </form>
+                <button id="buttonChangeFilesSettings" type="button">Files change settings</button>
+            </section>
 
         </div>
         <script type="text/javascript" src="cordova.js"></script>
