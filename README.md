@@ -41,6 +41,16 @@ Android with minimal SDK version of 21 and a device with NFC support
 
 ```cordova plugin add tangem-sdk```
 
+##### IOS Notes
+Your config.xml must contain.
+```xml
+    <platform name="ios">
+        ...
+        <preference name="deployment-target" value="13.0" />
+        <preference name="SwiftVersion" value="5.0" />
+    </platform>
+```
+
 #### Capacitor
 
 ```npm install tangem-sdk```
@@ -49,7 +59,7 @@ Android with minimal SDK version of 21 and a device with NFC support
 
 
 Cordova platform should do all the configurations by itself, but if you install this plugin from other compatible platforms do the following steps.
-#### iOS notes
+##### iOS notes
 
 1) Configure your app to detect NFC tags. Turn on Near Field Communication Tag Reading under the Capabilities tab for the project’s target (see [Add a capability to a target](https://help.apple.com/xcode/mac/current/#/dev88ff319e7)).
 
@@ -78,29 +88,8 @@ Cordova platform should do all the configurations by itself, but if you install 
     </array>
 ```
 
-#### Android notes
-Add to a project `build.gradle` file:
-
-```gradle
-allprojects {
-    repositories {
-        maven { url "https://jitpack.io" }
-    }
-}
-```
-
-And add Tangem library to the dependencies (in an app or module `build.gradle` file):
-
-```gradle
-dependencies {
-    implementation "com.github.tangem.tangem-sdk-android:tangem-core:$latestVersion"
-    implementation "com.github.tangem.tangem-sdk-android:tangem-sdk:$latestVersion"
-}
-```
-`tangem-core` is a JVM library (without Android dependencies) that provides core functionality of interacting with Tangem cards.
-`tangem-sdk` is an Android library that implements NFC interaction between Android devices and Tangem cards and graphical interface for this interaction.
-
-2. Save the file (you can name it anything you wish) with the following tech-list filters in the `<project-root>/res/xml`
+##### Android notes
+1) Save the file tech_filter.xml (you can name it anything you wish) with the following tech-list filters in the `<project-root>/res/xml`
 
 ```xml
 <resources>
@@ -112,7 +101,7 @@ dependencies {
 </resources>
 ```
 
-3. Add to `AndroidManifest.xml`:
+2) Add to `AndroidManifest.xml`:
 ```xml
 <activity android:name="MainActivity" android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
 

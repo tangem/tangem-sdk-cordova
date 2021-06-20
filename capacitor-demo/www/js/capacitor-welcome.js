@@ -88,7 +88,7 @@ window.customElements.define('capacitor-welcome', class extends HTMLElement {
 
     self.shadowRoot.querySelector('#scan-card')
         .addEventListener('click', async function(e) {
-          TangemSdk.scanCard(initialMessage, function (response, error) {
+          TangemSdk.scanCard(undefined, function (response, error) {
             if (response) {
               cardId = response.cardId;
               if (response.wallets.length > 0) {
