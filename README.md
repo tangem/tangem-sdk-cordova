@@ -151,6 +151,7 @@ Method `tangemSdk.sign()` allows you to sign one or multiple hashes. The SIGN co
 | ------------ | ------------ |
 | hashes | Array of hashes to be signed by card |
 | walletPublicKey | Public key of wallet that should be purged. |
+| hdPath | Public Derivation path of the wallet. Optional. COS v. 4.28 and higher |
 | cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
 | initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
 | callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
@@ -364,21 +365,21 @@ TangemSdk.readIssuerData(cardId, initialMessage, callback);
 ```
 
 #### Pin codes
-*Access code (PIN1)* restricts access to the whole card. App must submit the correct value of Access code in each command. 
-*Passcode (PIN2)* is required to sign a transaction or to perform some other commands entailing a change of the card state.
+*Access code* restricts access to the whole card. App must submit the correct value of Access code in each command. 
+*Passcode* is required to sign a transaction or to perform some other commands entailing a change of the card state.
 
 **Arguments:**
 
 | Parameter | Description |
 | ------------ | ------------ |
-| pin | Pin data |
+| code | Pin data |
 | cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
 | initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
 | callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
 
 ```js
-TangemSdk.changePin1(pin, cardId, initialMessage, callback);
-TangemSdk.changePin2(pin, cardId, initialMessage, callback);
+TangemSdk.setAccessCode(code, cardId, initialMessage, callback);
+TangemSdk.setPassCode(code, cardId, initialMessage, callback);
 ```
 ### Card attestation
 #### Card verification

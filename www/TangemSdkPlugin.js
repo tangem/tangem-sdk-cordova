@@ -41,15 +41,28 @@ var TangemSdk = {
 
 	/**
 	 * Elliptic curve used for wallet key operations.
-	 * @typedef {string} EllipticCurve
+	 * @typedef {"secp256k1"|"ed25519"|"secp256r1"} EllipticCurve
 	 */
 
 	/**
-	 * Determines which type of data is required for signing
-	 * @typedef {string} SigningMethod
+	 * Encryption Mode
+	 * @typedef {"none"|"fast"|"strong"} EncryptionMode
 	 */
 
-	/** @typedef {"online"|"offline"} VerificationState */
+	/**
+	 * Linked Terminal Status
+	 * @typedef {"current"|"other"|"none"} LinkedTerminalStatus
+	 */
+
+
+	/**
+	 * Determines which type of data is required for signing
+	 * @typedef {"string"} SigningMethod
+	 */
+
+	/**
+	 * @typedef {"failed"|"warning"|"skipped"|"verifiedOffline"|"verified"} Status
+	 */
 
 	/** @typedef {string} Data */
 
@@ -71,43 +84,13 @@ var TangemSdk = {
 	 */
 
 	/**
-	 * @typedef {Object} CardData Detailed information about card contents.
-	 * @property {string} [batchId] Tangem internal manufacturing batch ID.
-	 * @property {string} [blockchainName] - DEPRECATED: Name of the blockchain.
-	 * @property {string} [issuerName] Name of the issuer.
-	 * @property {Date} [manufactureDateTime] Timestamp of manufacturing
-	 * @property {Data} [manufacturerSignature] Signature of CardId with manufacturer’s private key.
-	 * @property {ProductMask[]} [productMask] Mask of products enabled on card.
-	 * @property {string} [tokenSymbol] Name of the token
-	 * @property {string} [tokenContractAddress] Smart contract address.
-	 * @property {number} [tokenDecimal] Number of decimals in token value.
-	 */
-
-	/**
-	 *
-	 * @typedef {Object} ArtworkInfo
-	 * @property {string} id
-	 * @property {string} hash
-	 * @property {string} date
-	 */
-
-	/**
-	 * Config of Wallet
-	 * @typedef {Object} WalletConfig
-	 * @property {boolean} [isReusable]
-	 * @property {boolean} [prohibitPurgeWallet]
-	 * @property {EllipticCurve} [EllipticCurve]
-	 * @property {SigningMethod} [signingMethods]
-	 */
-
-	/**
-	 * @typedef {Object} SimpleResponse
+	 * @typedef {Object} SuccessResponse
 	 * @property {string} cardId Unique Tangem card ID number.
 	 */
 
 	/**
-	 * @callback SimpleCallback
-	 * @param {SimpleResponse} response
+	 * @callback SuccessCallback
+	 * @param {SuccessResponse} response
 	 * @param {TangemSdkError} [error] Error
 	 * @return {void}
 	 */
@@ -123,55 +106,87 @@ var TangemSdk = {
 	/**
 	 * Error of TangemSdk
 	 * @typedef {Object} TangemSdkError
-	 * @property {Number} code
-	 * @property {String} localizedDescription
+	 * @property {number} code
+	 * @property {string} localizedDescription
 	 */
 
 	/**
-	 * @typedef CardWallet
-	 * @property {Number} index Index of wallet in card storage. Use this index to create `WalletIndex` for interaction with wallet on card
-	 * @property {WalletStatus} status Current status of wallet
-	 * @property {EllipticCurve} [curve] Explicit text name of the elliptic curve used for all wallet key operations.
-	 * @property {SettingsMask} [settingsMask] settingsMask
-	 * @property {Data} [publicKey] Public key of the blockchain wallet.
-	 * @property {Number} [signedHashes] Total number of signed single hashes returned by the card in `SignCommand`
-	 *  responses since card personalization. Sums up array elements within all `SignCommand`.
-	 * @property {Number} [remainingSignatures] Remaining number of `SignCommand` operations before the wallet will stop signing transactions.
-	 *  This counter were deprecated for cards with COS 4.0 and higher
+	 * @typedef WalletSettings
+	 * @property {boolean} isPermanent if true, erasing the wallet will be prohibited
+	 */
+
+	/**
+	 * @typedef Wallet
+	 * @property {Data} publicKey Public key of the blockchain wallet.
+	 * @property {Data} [chainCode] Optional chain code for BIP32 derivation.
+	 * @property {EllipticCurve} curve Elliptic curve used for all wallet key operations.
+	 * @property {WalletSettings} Wallet's settings
+	 * @property {number} [totalSignedHashes] Total number of signed hashes returned by the wallet since its creation
+	 * @property {number} [remainingSignatures] Remaining number of `Sign` operations before the wallet will stop signing any data.
+	 * - Note: This counter were deprecated for cards with COS 4.0 and higher
+	 * @property {number} index Index of wallet in card storage.
+	 */
+
+	/**
+	 * @typedef Manufacturer
+	 * @property {string} name Card manufacturer name.
+	 * @property {Date} manufactureDate Timestamp of manufacturing.
+	 * @property {Data} Signature of CardId with manufacturer’s private key. COS 1.21+
+	 */
+
+	/**
+	 * @typedef Issuer
+	 * @property {string} name Name of the issuer.
+	 * @property {Data} publicKey Public key that is used by the card issuer to sign IssuerData field.
+	 */
+
+	/**
+	 * @typedef Settings
+	 * @property {number} securityDelay Delay in milliseconds before executing a command that affects any sensitive data or wallets on the card
+	 * @property {number} maxWalletsCount Maximum number of wallets that can be created for this card
+	 * @property {boolean} isSettingAccessCodeAllowed Is allowed to change access code
+	 * @property {boolean} isSettingPasscodeAllowed Is allowed to change passcode
+	 * @property {boolean} isRemovingAccessCodeAllowed Is allowed to remove access code
+	 * @property {boolean} isLinkedTerminalEnabled Is LinkedTerminal feature enabled
+	 * @property {EncryptionMode[]} supportedEncryptionModes All encryption modes supported by the card
+	 * @property {boolean} isPermanentWallet Is allowed to delete wallet. COS before v4
+	 * @property {boolean} isOverwritingIssuerExtraDataRestricted Is overwriting issuer extra data restricted
+	 * @property {SigningMethod} [defaultSigningMethods] Card's default signing methods according personalization.
+	 * @property {EllipticCurve} [defaultCurve] Card's default curve according personalization.
+	 * @property {boolean} isIssuerDataProtectedAgainstReplay
+	 * @property {boolean} isSelectBlockchainAllowed
+	 */
+
+	/**
+	 * @typedef Attestation
+	 * @property {Status} cardKeyAttestation Attestation status of card's public key
+	 * @property {Status} walletKeysAttestation Attestation status of all wallet public key in the card
+	 * @property {Status} firmwareAttestation Attestation status of card's firmware. Not implemented for this time
+	 * @property {Status} cardUniquenessAttestation Attestation status of card's uniqueness. Not implemented for this time
 	 */
 
 	/**
 	 * @typedef {Object} Card Response for `ReadCommand`. Contains detailed card information
-	 * @property {string} [cardId] Unique Tangem card ID number.
-	 * @property {string} [manufacturerName] Name of Tangem card manufacturer.
-	 * @property {CardStatus} [cardStatus] Current status of the card.
+	 * @property {string} cardId Unique Tangem card ID number.
+	 * @property {string} batchId Tangem internal manufacturing batch ID.
+	 * @property {Data} cardPublicKey Public key that is used to authenticate the card against manufacturer’s database. It is generated one time during card manufacturing.
 	 * @property {FirmwareVersion} firmwareVersion Version of Tangem COS.
-	 * @property {Data} [cardPublicKey] Public key that is used to authenticate the card against manufacturer’s database.
-	 *  It is generated one time during card manufacturing.
-	 * @property {SettingsMask[]} [settingsMask] Card settings defined by personalization (bit mask: 0 – Enabled, 1 – Disabled).
-	 * @property {Data} [issuerPublicKey] Public key that is used by the card issuer to sign IssuerData field.
-	 * @property {SigningMethod} [signingMethods] Defines what data should be submitted to SIGN command.
-	 * @property {number} [pauseBeforePin2] Delay in centiseconds before COS executes commands protected by PIN2. This is a security delay value
+	 * @property {Manufacturer} manufacturer Information about manufacturer
+	 * @property {Issuer} issuer Information about issuer
+	 * @property {Settings} settings Card setting, that were set during the personalization process
+	 * @property {LinkedTerminalStatus} linkedTerminalStatus When this value is `current`, it means that the application is linked to the card,
+	 * and COS will not enforce security delay if `SignCommand` will be called
+	 * with `TlvTag.TerminalTransactionSignature` parameter containing a correct signature of raw data
+	 * to be signed made with `TlvTag.TerminalPublicKey`.
+	 * @property {boolean} [isPasscodeSet] PIN2 (aka Passcode) is set. Available only for cards with COS v.4.0 and higher.
+	 * @property {EllipticCurve[]} supportedCurves Array of elliptic curves, supported by this card. Only wallets with these curves can be created.
+	 * @property {Wallet[]} [wallets] Wallets, created on the card, that can be used for signature
+	 * @property {Attestation} attestation Card's attestation report
 	 * @property {number} [health] Any non-zero value indicates that the card experiences some hardware problems.
-	 *  User should withdraw the value to other blockchain wallet as soon as possible.
-	 *  Non-zero Health tag will also appear in responses of all other commands.
-	 * @property {boolean} isActivated Whether the card requires issuer’s confirmation of activation
-	 * @property {Data} [activationSeed] A random challenge generated by personalisation that should be signed and returned
-	 *  to COS by the issuer to confirm the card has been activated. This field will not be returned if the card is activated
-	 * @property {Data} [paymentFlowVersion] Returned only if `SigningMethod.SignPos` enabling POS transactions is supported by card
-	 * @property {number} [userCounter] This value can be initialized by terminal and will be increased by COS on execution of every `SignCommand`.
-	 *  For example, this field can store blockchain “nonce" for quick one-touch transaction on POS terminals.
-	 *  Returned only if `SigningMethod.SignPos`  enabling POS transactions is supported by card.
-	 * @property {boolean} terminalIsLinked When this value is true, it means that the application is linked to the card,
-	 *  and COS will not enforce security delay if `SignCommand` will be called
-	 *  with `TlvTag.TerminalTransactionSignature` parameter containing a correct signature of raw data
-	 *  to be signed made with `TlvTag.TerminalPublicKey`.
-	 * @property {CardData} [cardData] Detailed information about card contents. Format is defined by the card issuer.
-	 *  Cards complaint with Tangem Wallet application should have TLV format.
-	 * @property {boolean} [pin2IsDefault] Available only for cards with COS v.4.0 and higher.
-	 * @property {number} [walletsCount] Maximum number of wallets that can be created for this card
-	 * @property {CardWallet[]} [wallets] Array of the wallets
-	 */
+	 * User should withdraw the value to other blockchain wallet as soon as possible.
+	 * Non-zero Health tag will also appear in responses of all other commands.
+	 * @property {number} [remainingSignatures] Remaining number of `SignCommand` operations before the wallet will stop signing transactions.
+	 * This counter were deprecated for cards with COS 4.0 and higher
 
 	/**
 	 * The callback for success scan card.
@@ -190,17 +205,26 @@ var TangemSdk = {
 	 * @param {ScanCardCallback} [callback] Callback for command
 	 */
 	scanCard: function (initialMessage, callback) {
-		exec(
-			'scanCard',
-			{ initialMessage: initialMessage	},
+		jsonRPCRequest(
+			'scan',
+			{},
+			undefined,
+			initialMessage,
 			callback
 		);
 	},
 
 	/**
+	 * @typedef {Object} SignResponse
+	 * @property {string} cardId Unique Tangem card ID number.
+	 * @property {Data[]} signatures Signed hashes (array of resulting signatures)
+	 * @property {number} [totalSignedHashes] Total number of signed  hashes returned by the wallet since its creation. COS: 1.16+
+	 */
+
+	/**
 	 * The callback for success scan card.
 	 * @callback SignCallback
-	 * @param {Data[]} [response] Signed hashes (array of resulting signatures)
+	 * @param {SignResponse} [response] Signed hashes (array of resulting signatures)
 	 * @param {TangemSdkError} [error] Error
 	 * @return {void}
 	 */
@@ -216,60 +240,21 @@ var TangemSdk = {
 	 * Note: Wallet index works only on COS v.4.0 and higher. For previous version index will be ignored
 	 * @param {Data[]} hashes Array of transaction hashes. It can be from one or up to ten hashes of the same length.
 	 * @param {Data} walletPublicKey Public key of wallet that should sign hashes.
+	 * @param {string} [hdPath] Public Derivation path of the wallet. Optional. COS v. 4.28 and higher
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
 	 * @param {SignCallback} [callback] Callback for result
 	 */
-	sign: function (hashes, walletPublicKey, cardId, initialMessage, callback) {
-		exec(
-			'sign',
+	sign: function (hashes, walletPublicKey, hdPath, cardId, initialMessage, callback) {
+		jsonRPCRequest(
+			'sign_hashes',
 			{
-				hashes: hashes,
 				walletPublicKey: walletPublicKey,
-				cardId: cardId,
-				initialMessage: initialMessage
+				hdPath: hdPath,
+				hashes: hashes,
 			},
-			callback
-		);
-	},
-
-	/**
-	 * @typedef {Object} VerifyResponse
-	 * @property {ArtworkInfo} [artworkInfo]
-	 * @property {string} cardId Unique Tangem card ID number.
-	 * @property {Data} cardPublicKey
-	 * @property {Data} cardSignature
-	 * @property {Data} salt
-	 * @property {VerificationState} [verificationState]
-	 */
-
-	/**
-	 * Callback triggered on the completion of the `verify` command
-	 *  and provides card response in the form of `verifyResponse` if the task was performed successfully
-	 * @callback VerifyCallback
-	 * @param {VerifyResponse} [response] Response for `Verify` Command
-	 * @param {TangemSdkError} [error] Error
-	 * @return {void}
-	 */
-
-	/**
-	 * This method launches a `Verify` card command on a new thread.
-	 *
-	 * The command to ensures the card has not been counterfeited.
-	 * By using standard challenge-response scheme, the card proves possession of CardPrivateKey
-	 * that corresponds to CardPublicKey returned by [ReadCommand]. Then the data is sent
-	 * to Tangem server to prove that this card was indeed issued by Tangem.
-	 * The online part of the verification is unavailable for DevKit cards.
-	 * @param {boolean} online Flag that allows disable online verification. Do not use for developer cards
-	 * @param {string} [cardId] Unique Tangem card ID number.
-	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {VerifyCallback} [callback] Callback triggered on the completion of the VerifyCardCommand
-	 *  and provides card response in the form of [VerifyCardResponse] if the task was performed successfully
-	 */
-	verify: function (online, cardId, initialMessage, callback) {
-		exec(
-			'verify',
-			{ online: online, cardId: cardId, initialMessage: initialMessage },
+			cardId,
+			initialMessage,
 			callback
 		);
 	},
@@ -321,7 +306,7 @@ var TangemSdk = {
 	 *  If nil, the current counter value will not be overwritten.
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {SimpleCallback} [callback] Callback for result
+	 * @param {SuccessCallback} [callback] Callback for result
 	 */
 	writeIssuerData: function (issuerData, issuerDataSignature, issuerDataCounter, cardId, initialMessage, callback) {
 		exec(
@@ -389,7 +374,7 @@ var TangemSdk = {
 	 * @param {number} [issuerDataCounter] An optional counter that protect issuer data against replay attack.
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {SimpleCallback} [callback] Callback for result
+	 * @param {SuccessCallback} [callback] Callback for result
 	 */
 	writeIssuerExtraData: function (issuerData, startingSignature, finalizingSignature, issuerDataCounter, cardId, initialMessage, callback) {
 		exec(
@@ -459,7 +444,7 @@ var TangemSdk = {
 	 *  If nil, the current counter value will not be overwritten.
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {SimpleCallback} [callback] Callback for result
+	 * @param {SuccessCallback} [callback] Callback for result
 	 */
 	writeUserData: function (userData, userCounter, cardId, initialMessage, callback) {
 		exec(
@@ -490,7 +475,7 @@ var TangemSdk = {
 	 *  If nil, the current counter value will not be overwritten.
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {SimpleCallback} [callback] Callback for result
+	 * @param {SuccessCallback} [callback] Callback for result
 	 */
 	writeUserProtectedData: function (userProtectedData, userProtectedCounter, cardId, initialMessage, callback) {
 		exec(
@@ -508,10 +493,7 @@ var TangemSdk = {
 	/**
 	 * @typedef {Object} CreateWalletResponse
 	 * @property {string} cardId Unique Tangem card ID number.
-	 * @property {CardStatus} status Current status of the card [1 - Empty, 2 - Loaded, 3- Purged]
-	 * @property {number} walletIndex Wallet index on card.
-	 *  - Note: Available only for cards with COS v.4.0 and higher
-	 * @property {Data} walletPublicKey Public key of a newly created blockchain wallet.
+	 * @property {Wallet} wallet Created wallet
 	 */
 
 	/**
@@ -529,33 +511,24 @@ var TangemSdk = {
 	 * according to a specific blockchain algorithm.
 	 * WalletPrivateKey is never revealed by the card and will be used by `SignCommand` and `CheckWalletCommand`.
 	 * RemainingSignature is set to MaxSignatures.
-	 * @param {WalletConfig} [config] Configuration for wallet that should be created (blockchain name, token...).
-	 *  This parameter available for cards with COS v.4.0 and higher. For earlier versions it will be ignored
+	 * @param {EllipticCurve} curve Wallet's elliptic curve
+	 * @param {boolean} isPermanent: If this wallet can be deleted or not.
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
 	 * @param {CreateWalletCallback} [callback] Callback for result
 	 */
-	createWallet: function (config, cardId, initialMessage, callback) {
-		exec(
-			'createWallet',
-			{ config: config, cardId: cardId, initialMessage: initialMessage	},
+	createWallet: function (curve, isPermanent, cardId, initialMessage, callback) {
+		jsonRPCRequest(
+			'create_wallet',
+			{
+				curve: curve,
+				isPermanent: isPermanent
+			},
+			cardId,
+			initialMessage,
 			callback
 		);
 	},
-
-	/**
-	 * @typedef {Object} PurgeWalletResponse
-	 * @property {string} cardId Unique Tangem card ID number.
-	 * @property {CardStatus} status Current status of the card [1 - Empty, 2 - Loaded, 3- Purged]
-	 * @property {number} walletIndex Index of purged wallet
-	 */
-
-	/**
-	 * @callback PurgeWalletCallback
-	 * @param {PurgeWalletResponse} [response]
-	 * @param {TangemSdkError} [error] Error
-	 * @return {void}
-	 */
 
 	/**
 	 * This command deletes all wallet data. If Is_Reusable flag is enabled during personalization,
@@ -564,59 +537,52 @@ var TangemSdk = {
 	 * ‘Purged’ state is final, it makes the card useless.
 	 * - Note: Wallet index available for cards with COS v.4.0 or higher
 	 * @param {Data} walletPublicKey Public key of wallet that should be purged.
-	 * @param {string} [cardId] Unique Tangem card ID number.
+	 * @param {string} cardId Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {PurgeWalletCallback} [callback] Callback for result
+	 * @param {SuccessCallback} [callback] Callback for result
 	 */
 	purgeWallet: function (walletPublicKey, cardId, initialMessage, callback) {
-		exec(
-			'purgeWallet',
-			{ walletPublicKey: walletPublicKey, cardId: cardId, initialMessage: initialMessage	},
+		jsonRPCRequest(
+			'purge_wallet',
+			{ walletPublicKey: walletPublicKey},
+			cardId,
+			initialMessage,
 			callback
 		);
 	},
 
 	/**
-	 * @typedef {Object} ChangePinResponse
-	 * @property {string} cardId Unique Tangem card ID number.
-	 * @property {string} status status
-	 */
-
-	/**
-	 * @callback ChangePinCallback
-	 * @param {ChangePinResponse} [response]
-	 * @param {TangemSdkError} [error] Error
-	 * @return {void}
-	 */
-
-	/**
-	 * Command for change pin1
-	 * @param {Data} pin Pin data
-	 * @param {string} [cardId] Unique Tangem card ID number.
+	 * Set or change card's access code
+	 * @param {string} accessCode Access code to set. If nil, the user will be prompted to enter code before operation
+	 * @param {string} cardId Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {ChangePinCallback} [callback] Callback for result
+	 * @param {SuccessCallback} [callback] Callback for result
 	 */
-	changePin1: function (pin, cardId, initialMessage, callback) {
-		exec(
-			'changePin1',
-			{ pin: pin, cardId: cardId, initialMessage: initialMessage	},
+	setAccessCode: function (accessCode, cardId, initialMessage, callback) {
+		jsonRPCRequest(
+			'set_accesscode',
+			{ accessCode: accessCode },
+			cardId,
+			initialMessage,
 			callback
 		)
 	},
 
 	/**
-	 * Command for change pin2
-	 * @param {Data} pin Pin data
-	 * @param {string} [cardId] Unique Tangem card ID number.
+	 * Set or change card's passcode
+	 * @param {string} passcode: Passcode to set. If nil, the user will be prompted to enter code before operation
+	 * @param {string} cardId Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {ChangePinCallback} [callback] Callback for result
+	 * @param {SuccessCallback} [callback] Callback for result
 	 */
-	changePin2: function (pin, cardId, initialMessage, callback) {
-		exec(
-			'changePin2',
-			{ pin: pin, cardId: cardId, initialMessage: initialMessage	},
+	setPassCode: function (passcode, cardId, initialMessage, callback) {
+		jsonRPCRequest(
+			'set_passcode',
+			{ passcode: passcode },
+			cardId,
+			initialMessage,
 			callback
-		);
+		)
 	},
 
 	/**
@@ -634,10 +600,14 @@ var TangemSdk = {
 
 	/**
 	 * @typedef {Object} File
-	 * @property {number} fileIndex
-	 * @property {Data} fileData
-	 * @property {FileSettings} [fileSettings]
-	 * @property {FileValidation} fileValidationStatus
+	 * @property {Data} data
+	 * @property {Data} [startingSignature]
+	 * @property {Data} [finalizingSignature]
+	 * @property {number} [counter]
+	 * @property {Data} [issuerPublicKey]
+	 * @property {boolean} [requiredPasscode]
+	 * @property {FirmwareVersion} [minFirmwareVersion]
+	 * @property {FirmwareVersion} [maxFirmwareVersion]
 	 */
 
 	/**
@@ -665,9 +635,14 @@ var TangemSdk = {
 	 * @param {ReadFilesCallback} [callback] Callback for result
 	 */
 	readFiles: function (readPrivateFiles, indices, cardId, initialMessage, callback) {
-		exec(
-			'readFiles',
-			{ readPrivateFiles: readPrivateFiles, indices: indices, 	cardId: cardId,	initialMessage: initialMessage },
+		jsonRPCRequest(
+			'read_files',
+			{
+				readPrivateFiles: readPrivateFiles,
+				indices: indices
+			},
+			cardId,
+			initialMessage,
 			callback
 		);
 	},
@@ -700,9 +675,11 @@ var TangemSdk = {
 	 * @param {WriteFilesCallback} [callback] Callback for result
 	 */
 	writeFiles: function (files, cardId, initialMessage, callback) {
-		exec(
-			'writeFiles',
-			{ files: files, cardId: cardId, initialMessage: initialMessage },
+		jsonRPCRequest(
+			'write_files',
+			{ files: files },
+			cardId,
+			initialMessage,
 			callback
 		);
 	},
@@ -716,12 +693,14 @@ var TangemSdk = {
 	 * @param {number[]} [indicesToDelete] Indexes of files that should be deleted. If nil - deletes all files from card
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {SimpleCallback} [callback] Callback for result
+	 * @param {SuccessCallback} [callback] Callback for result
 	 */
 	deleteFiles: function (indicesToDelete, cardId, initialMessage, callback) {
-		exec(
-			'deleteFiles',
-			{ indicesToDelete: indicesToDelete, cardId: cardId, initialMessage: initialMessage	},
+		jsonRPCRequest(
+			'delete_files',
+			{ indicesToDelete: indicesToDelete },
+			cardId,
+			initialMessage,
 			callback
 		);
 	},
@@ -736,12 +715,14 @@ var TangemSdk = {
 	 * @param {FileSettingsChange} changes Array of file indices with new settings
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {SimpleCallback} [callback] Callback for result
+	 * @param {SuccessCallback} [callback] Callback for result
 	 */
 	changeFilesSettings: function (changes, cardId, initialMessage, callback) {
-		exec(
-			'changeFilesSettings',
-			{ changes: changes, cardId: cardId, initialMessage: initialMessage },
+		jsonRPCRequest(
+			'change_file_settings',
+			{ changes: changes },
+			cardId,
+			initialMessage,
 			callback
 		)
 
@@ -766,7 +747,6 @@ function exec(command, options, callback) {
 	});
 	cordovaExec(
 		function (result) {
-			console.log(typeof result);
 			callback && callback(JSON.parse(result));
 		},
 		function (error) {
@@ -775,6 +755,37 @@ function exec(command, options, callback) {
 		'TangemSdkPlugin',
 		command,
 		[options]
+	);
+}
+
+/**
+ * Execute jsonRPCRequest
+ *
+ * @param {string} method Name of method
+ * @param {Object} [params] Options for jsonRPCRequest
+ * @param {string} [cardId] Unique Tangem card ID number.
+ * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
+ * @param {CommonCallback} [callback] Callback
+ */
+function jsonRPCRequest(method, params, cardId, initialMessage, callback) {
+	exec(
+		'runJSONRPCRequest', {
+			JSONRPCRequest: JSON.stringify({ jsonrpc: '2.0', id: '1', method: method, params: params || {} }),
+			cardId: cardId,
+			initialMessage: JSON.stringify(initialMessage)
+		},
+		function (response, error) {
+			if (response && response.result) {
+				return callback(response.result);
+			}
+			if (error) {
+				return callback(undefined, error);
+			}
+			if (response.error) {
+				return callback(undefined, response.error);
+			}
+			return callback(undefined, { code: 0, localizedDescription: 'Unknown error' });
+		},
 	);
 }
 

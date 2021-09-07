@@ -14,28 +14,6 @@ import TangemSdk
         }
     }
 
-    @objc(sign:) func sign(command: CDVInvokedUrlCommand) {
-        let params = command.params
-        guard let hexHashes: [String] = params?.getArg(.hashes),
-              let walletPublicKey: Data = params?.getArg(.walletPublicKey) else {
-            handleMissingArgs(callbackId: command.callbackId)
-            return
-        }
-
-        sdk.sign(hashes: hexHashes.compactMap({Data(hexString: $0)}),
-                 walletPublicKey: walletPublicKey,
-                 cardId: params?.getArg(.cardId),
-                 initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
-            switch result {
-            case .success(let signResponse):
-                let hexes = signResponse.map { $0.asHexString() }
-                self?.handleResult(.success(hexes), callbackId: command.callbackId)
-            case .failure(let error):
-                self?.handleResult(Result<[String], TangemSdkError>.failure(error), callbackId: command.callbackId)
-            }
-        }
-    }
-
     @objc(readIssuerData:) func readIssuerData(command: CDVInvokedUrlCommand) {
         sdk.readIssuerData(cardId: command.params?.getArg(.cardId),
                            initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
@@ -123,104 +101,19 @@ import TangemSdk
         }
     }
 
-    @objc(createWallet:) func createWallet(command: CDVInvokedUrlCommand) {
-        let config: WalletConfigWrapper? = command.params?.getArg(.config)
-        sdk.createWallet(config: config.map { $0.walletConfig }, cardId: command.params?.getArg(.cardId),
-                         initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
-                            self?.handleResult(result, callbackId: command.callbackId)
-        }
-    }
-
-    @objc(purgeWallet:) func purgeWallet(command: CDVInvokedUrlCommand) {
+    @objc(runJSONRPCRequest:) func runJSONRPCRequest(command: CDVInvokedUrlCommand) {
         let params = command.params
-        guard let walletPublicKey: Data = params?.getArg(.walletPublicKey) else {
-            handleMissingArgs(callbackId: command.callbackId)
-            return
-        }
-        sdk.purgeWallet(walletPublicKey: walletPublicKey,
-                        cardId: params?.getArg(.cardId),
-                        initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
-                            self?.handleResult(result, callbackId: command.callbackId)
-        }
-    }
-
-    @objc(changePin1:) func changePin1(command: CDVInvokedUrlCommand)  {
-        let pin: String? = command.params?.getArg(.pinCode)
-
-        sdk.changePin1(pin: pin?.sha256(),
-                       cardId: command.params?.getArg(.cardId),
-                       initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
-                        self?.handleResult(result, callbackId: command.callbackId)
-        }
-    }
-
-    @objc(changePin2:) func changePin2(command: CDVInvokedUrlCommand) {
-        let pin: String? = command.params?.getArg(.pinCode)
-
-        sdk.changePin2(pin: pin?.sha256(),
-                       cardId: command.params?.getArg(.cardId),
-
-                       initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
-                        self?.handleResult(result, callbackId: command.callbackId)
-        }
-    }
-
-    @objc(verify:) func verify(command: CDVInvokedUrlCommand) {
-        if let online: Bool = command.params?.getArg(.online) {
-            sdk.verify(online: online,
-                       cardId: command.params?.getArg(.cardId),
-                       initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
-                        self?.handleResult(result, callbackId: command.callbackId) }
-        } else {
-            sdk.verify(cardId: command.params?.getArg(.cardId),
-                       initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
-                        self?.handleResult(result, callbackId: command.callbackId)
-            }
-        }
-    }
-
-    @objc(readFiles:) func readFiles(command: CDVInvokedUrlCommand) {
-        let readPrivateFiles: Bool = command.params?.getArg(.readPrivateFiles) ?? false
-        sdk.readFiles(readPrivateFiles: readPrivateFiles,
-                      indices: command.params?.getArg(.indices),
-                      cardId: command.params?.getArg(.cardId),
-                      initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
-            self?.handleResult(result, callbackId: command.callbackId)
-        }
-    }
-
-    @objc(writeFiles:) func writeFiles(command: CDVInvokedUrlCommand) {
-        guard let fileWrappers: [FileDataWrapper] = command.params?.getArg(.files) else {
+        guard let request: String = params?.getArg(.JSONRPCRequest) else {
             handleMissingArgs(callbackId: command.callbackId)
             return
         }
 
-        sdk.writeFiles(files: fileWrappers.map { $0.dataToWrite },
-                       cardId: command.params?.getArg(.cardId),
-                       initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
-            self?.handleResult(result, callbackId: command.callbackId)
-        }
-    }
-
-    @objc(deleteFiles:) func deleteFiles(command: CDVInvokedUrlCommand) {
-        sdk.deleteFiles(indicesToDelete: command.params?.getArg(.indices),
-                        cardId: command.params?.getArg(.cardId),
-                        initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
-            self?.handleResult(result, callbackId: command.callbackId)
-        }
-    }
-
-    @objc(changeFilesSettings:) func changeFilesSettings(command: CDVInvokedUrlCommand) {
-        guard let changes: [FileSettingsChangeWrapper] = command.params?.getArg(.changes) else {
-            handleMissingArgs(callbackId: command.callbackId)
-            return
+        sdk.startSession(with: request,
+                         cardId: params?.getArg(.cardId),
+                         initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
+                           self?.handleJSONRPCResult(result, callbackId: command.callbackId)
         }
 
-        sdk.changeFilesSettings(changes: changes.map { $0.fileSettingsChange },
-                                cardId: command.params?.getArg(.cardId),
-                                initialMessage: command.params?.getArg(.initialMessage)) { [weak self] result in
-            self?.handleResult(result, callbackId: command.callbackId)
-        }
     }
 
     private func handleMissingArgs(callbackId: String) {
@@ -229,11 +122,16 @@ import TangemSdk
         commandDelegate.send(errorResult, callbackId: callbackId)
     }
 
+    private func handleJSONRPCResult(_ result: String, callbackId: String) {
+        let cdvresult: CDVPluginResult = CDVPluginResult(status: .ok, messageAs: result)
+        commandDelegate.send(cdvresult, callbackId: callbackId)
+    }
+
     private func handleResult<TResult: JSONStringConvertible>(_ result: Result<TResult, TangemSdkError>, callbackId: String) {
         var cdvresult: CDVPluginResult
         switch result {
         case .success(let response):
-            cdvresult = CDVPluginResult(status: .ok, messageAs: response.description)
+            cdvresult = CDVPluginResult(status: .ok)
         case .failure(let error):
             cdvresult = CDVPluginResult(status: .error, messageAs: error.toPluginError().jsonDescription)
         }
@@ -275,6 +173,7 @@ fileprivate enum ArgKey: String {
     case changes
     case walletPublicKey
     case config
+    case JSONRPCRequest
 }
 
 fileprivate extension Dictionary where Key == String, Value == Any {
@@ -336,53 +235,8 @@ fileprivate extension TangemSdkError {
     }
 }
 
-fileprivate struct FileDataWrapper: Codable {
-    let data: String
-    let counter: Int?
-    let signature: FileDataSignature?
-    let issuerPublicKey: String?
-
-    var dataToWrite: DataToWrite {
-        let data = self.data.toData()
-        if let counter = counter, let signature = signature {
-            return FileDataProtectedBySignature(data: data,
-                                                startingSignature: signature.startingSignature.toData(),
-                                                finalizingSignature: signature.finalizingSignature.toData(),
-                                                counter: counter,
-                                                issuerPublicKey: issuerPublicKey?.toData())
-        } else {
-            return FileDataProtectedByPasscode(data: data)
-        }
-    }
-}
-
-fileprivate struct FileDataSignature: Codable {
-    let startingSignature: String
-    let finalizingSignature: String
-}
-
 fileprivate extension String {
     func toData() -> Data {
         Data(hexString: self)
-    }
-}
-
-fileprivate struct FileSettingsChangeWrapper: Codable {
-    let fileIndex: Int
-    let settings: Int
-
-    var fileSettingsChange: FileSettingsChange {
-        FileSettingsChange(fileIndex: fileIndex, settings: FileSettings(rawValue: settings)!)
-    }
-}
-
-fileprivate struct WalletConfigWrapper: Codable {
-    let isReusable: Bool?
-    let prohibitPurgeWallet: Bool?
-    let curveId: String?
-    let signingMethods: SigningMethod?
-
-    var walletConfig: WalletConfig {
-        WalletConfig(isReusable: isReusable, prohibitPurgeWallet: prohibitPurgeWallet, curveId: (curveId != nil) ?  EllipticCurve(rawValue: curveId!) : nil, signingMethods: signingMethods)
     }
 }

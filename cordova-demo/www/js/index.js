@@ -34,7 +34,6 @@ var app = {
 
         document.getElementById('buttonScanCard').addEventListener('click', onScanCard);
         document.getElementById('buttonSign').addEventListener('click', onSign);
-        document.getElementById('buttonVerify').addEventListener('click', onVerify);
         document.getElementById('buttonReadIssuerData').addEventListener('click', onReadIssuerData);
         document.getElementById('buttonWriteIssuerData').addEventListener('click', onWriteIssuerData);
         document.getElementById('buttonReadIssuerExtraData').addEventListener('click', onReadIssuerExtraData);
@@ -44,8 +43,8 @@ var app = {
         document.getElementById('buttonWriteUserProtectedData').addEventListener('click', onWriteUserProtectedData);
         document.getElementById('buttonCreateWallet').addEventListener('click', onCreateWallet);
         document.getElementById('buttonPurgeWallet').addEventListener('click', onPurgeWallet);
-        document.getElementById('buttonChangePin1').addEventListener('click', onChangePin1);
-        document.getElementById('buttonChangePin2').addEventListener('click', onChangePin2);
+        document.getElementById('buttonSetPassCode').addEventListener('click', onSetPassCode);
+        document.getElementById('buttonSetAccessCode').addEventListener('click', onSetAccessCode);
         document.getElementById('buttonReadFiles').addEventListener('click', onReadFiles);
         document.getElementById('buttonWriteFiles').addEventListener('click', onWriteFiles);
         document.getElementById('buttonDeleteFiles').addEventListener('click', onDeleteFiles);
@@ -96,6 +95,18 @@ var app = {
                     if (response.wallets.length > 0) {
                         setByClass('walletPublicKey', response.wallets[0].publicKey);
                     }
+                    if (response.supportedCurves) {
+                        var curveSelect = document.getElementById("createWalletEllipticCurve");
+                        var i, L = curveSelect.options.length - 1;
+                        for(i = L; i >= 0; i--) {
+                            curveSelect.remove(i);
+                        }
+                        for(i = 0; i < response.supportedCurves.length; i++ ) {
+                            var option = document.createElement( 'option' );
+                            option.value = option.text = response.supportedCurves[i];
+                            curveSelect.add( option );
+                        }
+                    }
                 }
             });
         }
@@ -116,12 +127,7 @@ var app = {
             }
             var walletPublicKey = getElementValue('signWalletPublicKey');
             var cardId = getElementValue('signCardId');
-            TangemSdk.sign(hashes, walletPublicKey, cardId, undefined, callback('taSign'));
-        }
-
-        function onVerify(){
-            var online = document.getElementById('onlineVerify').checked;
-            TangemSdk.verify(online, undefined, undefined, callback('taVerify'));
+            TangemSdk.sign(hashes, walletPublicKey, undefined, cardId, undefined, callback('taSign'));
         }
 
         function onReadIssuerData() {
@@ -170,7 +176,10 @@ var app = {
         }
 
         function onCreateWallet() {
-            TangemSdk.createWallet(undefined, undefined, undefined, callback('taCreateWallet'));
+            var curve = getElementValue('createWalletEllipticCurve');
+            var isPermanent = document.getElementById('createWalletIsPermanent').checked;
+            var cardId = getElementValue('signCardId');
+            TangemSdk.createWallet(curve, isPermanent, cardId, undefined, callback('taCreateWallet'));
         }
 
         function onPurgeWallet() {
@@ -178,14 +187,14 @@ var app = {
             TangemSdk.purgeWallet(walletPublicKey, undefined, undefined, callback('taPurgeWallet'));
         }
 
-        function onChangePin1() {
-            var pin = getElementValue('pin1');
-            TangemSdk.changePin1(pin, undefined, undefined, callback('taChangePin1'));
+        function onSetAccessCode() {
+            var accessCode = getElementValue('accessCode');
+            TangemSdk.setAccessCode(accessCode, undefined, undefined, callback('taSetAccessCode'));
         }
 
-        function onChangePin2() {
-            var pin = getElementValue('pin2');
-            TangemSdk.changePin1(pin, undefined, undefined, callback('taChangePin2'));
+        function onSetPassCode() {
+            var passCode = getElementValue('passCode');
+            TangemSdk.setPassCode(passCode, undefined, undefined, callback('taSetPassCode'));
         }
 
         function onReadFiles() {

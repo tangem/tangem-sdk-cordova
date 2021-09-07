@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
         <meta name="format-detection" content="telephone=no">
@@ -12,7 +12,7 @@
         <div id="splashScreen">
             <h1>Tangem Cordova</h1>
         </div>
-        <div id="app" style="display:">
+        <div id="app" style="display:block">
             <section>
                 <h2>Scan Card</h2>
                 <form class="request">
@@ -39,7 +39,7 @@
                     <input type="text" id="hash3"/>
                     <label for="signWalletPublicKey">Wallet Public Key</label>
                     <input type="text" class="walletPublicKey" id="signWalletPublicKey"/>
-                    <label for="signCardId">Cadr Id</label>
+                    <label for="signCardId">Card Id</label>
                     <input type="text" class="cardId" id="signCardId"/>
                 </form>
                 <form class="response">
@@ -50,23 +50,17 @@
             </section>
 
             <section>
-                <h2>Verify</h2>
-                <form class="request">
-                    <label>Online
-                        <input type="checkbox" id="onlineVerify" checked value="online">
-                    </label>
-                </form>
-                <form class="response">
-                    <label for="taVerify">Response:</label>
-                    <textarea id="taVerify"></textarea>
-                </form>
-                <button id="buttonVerify" type="button">Verify</button>
-            </section>
-
-            <section>
                 <h2>Create Wallet</h2>
                 <form class="request">
-
+                    <label>Elliptic curve
+                        <select id="createWalletEllipticCurve">
+                        </select>
+                    </label>
+                    <label>Is Permanent
+                        <input type="checkbox" id="createWalletIsPermanent">
+                    </label>
+                    <label for="createWalletCardId">Card Id</label>
+                    <input type="text" class="cardId" id="createWalletCardId"/>
                 </form>
                 <form class="response">
                     <label for="taCreateWallet">Response:</label>
@@ -186,29 +180,29 @@
             </section>
 
             <section>
-                <h2>Change Pin1</h2>
+                <h2>Set AccessCode</h2>
                 <form class="request">
-                    <label for="pin1">Pin 1</label>
-                    <input type="text" id="pin1" value=""/>
+                    <label for="accessCode">AccessCode</label>
+                    <input type="text" id="accessCode" value=""/>
                 </form>
                 <form class="response">
-                    <label for="taChangePin1">Response:</label>
-                    <textarea id="taChangePin1"></textarea>
+                    <label for="taSetAccessCode">Response:</label>
+                    <textarea id="taSetAccessCode"></textarea>
                 </form>
-                <button id="buttonChangePin1" type="button">Change Pin1</button>
+                <button id="buttonSetAccessCode" type="button">Set AccessCode</button>
             </section>
 
             <section>
-                <h2>Change Pin2</h2>
+                <h2>Set PassCode</h2>
                 <form class="request">
-                    <label for="pin2">Pin 2</label>
-                    <input type="text" id="pin2" value=""/>
+                    <label for="passCode">PassCode</label>
+                    <input type="text" id="passCode" value=""/>
                 </form>
                 <form class="response">
-                    <label for="taChangePin2">Response:</label>
-                    <textarea id="taChangePin2"></textarea>
+                    <label for="taSetPassCode">Response:</label>
+                    <textarea id="taSetPassCode"></textarea>
                 </form>
-                <button id="buttonChangePin2" type="button">Change Pin2</button>
+                <button id="buttonSetPassCode" type="button">Set PassCode</button>
             </section>
 
             <section>
