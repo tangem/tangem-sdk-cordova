@@ -16,6 +16,7 @@
     "@capacitor/android": "^2.4.0",
     "@capacitor/cli": "^2.4.0",
     "@capacitor/core": "^2.4.0",
-    "@capacitor/ios": "^2.4.0"
+    "@capacitor/ios": "^2.4.0",
+    "tangem-sdk": "file:.."
   }
 }
