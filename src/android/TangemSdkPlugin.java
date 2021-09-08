@@ -9,10 +9,7 @@ import com.tangem.common.services.secure.SecureStorage;
 import com.tangem.tangem_sdk_new.DefaultSessionViewDelegate;
 import com.tangem.tangem_sdk_new.nfc.NfcManager;
 import com.tangem.tangem_sdk_new.storage.AndroidSecureStorageKt;
-import org.apache.cordova.CallbackContext;
-import org.apache.cordova.CordovaInterface;
-import org.apache.cordova.CordovaPlugin;
-import org.apache.cordova.CordovaWebView;
+import org.apache.cordova.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -76,6 +73,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
         switch (action) {
             case "runJSONRPCRequest": {
                 runJSONRPCRequest(callbackContext, args);
+                return true;
             }
         }
         return false;
@@ -84,8 +82,11 @@ public class TangemSdkPlugin extends CordovaPlugin {
     private void runJSONRPCRequest(CallbackContext callbackContext, JSONArray args) {
         try {
             JSONObject jsO = (JSONObject) args.get(0);
-            sdk.startSessionWithJsonRequest(jsO.getString("JSONRPCRequest"), jsO.optString("cardId", null),
-                    jsO.optString("initialMessage", null), completionResult -> {
+            sdk.startSessionWithJsonRequest(
+                    jsO.getString("JSONRPCRequest"),
+                    jsO.optString("cardId", null),
+                    jsO.optString("initialMessage", null),
+                    completionResult -> {
                         callbackContext.success(completionResult);
                         return null;
                     });
