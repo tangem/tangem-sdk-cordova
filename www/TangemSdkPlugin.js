@@ -15,21 +15,6 @@ var TangemSdk = {
 	 */
 
 	/**
-	 * Mask of product (Note, Tag, IdCard, IdIssuer, TwinCard)
-	 * @typedef {string} ProductMask
-	 */
-
-	/**
-	 * Status of the card and its wallet. (notPersonalized, empty, loaded, purged)
-	 * @typedef {string} CardStatus
-	 */
-
-	/**
-	 * Status of the wallet. empty = 1, loaded = 2, purged = 3)
-	 * @typedef {string} WalletStatus
-	 */
-
-	/**
 	 * Firmware Type ("d SDK", "r", "special")
 	 * @typedef {string} FirmwareType
 	 */
@@ -65,13 +50,6 @@ var TangemSdk = {
 	 */
 
 	/** @typedef {string} Data */
-
-	/**
-	 * Index to specific wallet for interaction
-	 * @typedef {Object} WalletIndex
-	 * @property {number} index Index of wallet
-	 * @property {Data} publicKey Wallet public key
-	 */
 
 	/**
 	 * @typedef {Object} FirmwareVersion Holds information about card firmware version included version saved on card `version`,
@@ -255,237 +233,6 @@ var TangemSdk = {
 			},
 			cardId,
 			initialMessage,
-			callback
-		);
-	},
-
-	/**
-	 * @typedef {Object} ReadIssuerDataResponse
-	 * @property {string} cardId Unique Tangem card ID number.
-	 * @property {Data} userData Data defined by user's App.
-	 * @property {Data} userProtectedData Counter initialized by user's App and increased on every signing of new transaction
-	 * @property {number} userCounter Counter initialized by user's App and increased on every signing of new transaction
-	 * @property {number} userProtectedCounter Counter initialized by user's App (confirmed by PIN2) and increased on every signing of new transaction
-	 */
-
-	/**
-	 * @callback ReadIssuerDataCallback
-	 * @param {ReadIssuerDataResponse} [response]
-	 * @param {TangemSdkError} [error] Error
-	 * @return {void}
-	 */
-
-	/**
-	 * This command return 512-byte Issuer Data field and its issuer’s signature.
-	 * Issuer Data is never changed or parsed from within the Tangem COS. The issuer defines purpose of use,
-	 * format and payload of Issuer Data. For example, this field may contain information about
-	 * wallet balance signed by the issuer or additional issuer’s attestation data.
-	 * @param {string} [cardId] Unique Tangem card ID number.
-	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {ReadIssuerDataCallback} [callback] Callback for result
-	 */
-	readIssuerData: function (cardId, initialMessage, callback) {
-		exec(
-			'readIssuerData',
-			{ cardId: cardId, initialMessage: initialMessage },
-			callback
-		);
-	},
-
-	/**
-	 * This command writes some UserData, and UserCounter fields.
-	 * User_Data are never changed or parsed by the executable code the Tangem COS.
-	 * The App defines purpose of use, format and it's payload. For example, this field may contain cashed information
-	 * from blockchain to accelerate preparing new transaction.
-	 * User_Counter are counter, that initial value can be set by App and increased on every signing
-	 * of new transaction (on SIGN command that calculate new signatures). The App defines purpose of use.
-	 * For example, this fields may contain blockchain nonce value.
-	 * @param {Data} issuerData Data defined by user’s App
-	 * @param {Data} issuerDataSignature Issuer’s signature of `issuerData` with Issuer Data Private Key (which is kept on card).
-	 * @param {number} [issuerDataCounter] Counter initialized by user’s App and increased on every signing of new transaction.
-	 *  If nil, the current counter value will not be overwritten.
-	 * @param {string} [cardId] Unique Tangem card ID number.
-	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {SuccessCallback} [callback] Callback for result
-	 */
-	writeIssuerData: function (issuerData, issuerDataSignature, issuerDataCounter, cardId, initialMessage, callback) {
-		exec(
-			'writeIssuerData',
-			{
-				issuerData: issuerData,
-				issuerDataSignature: issuerDataSignature,
-				issuerDataCounter: issuerDataCounter,
-				cardId: cardId,
-				initialMessage: initialMessage
-			},
-			callback
-		);
-	},
-
-	/**
-	 * @typedef {Object} ReadIssuerExtraDataResponse
-	 * @property {string} cardId Unique Tangem card ID number.
-	 * @property {number} [size] Size of all Issuer_Extra_Data field.
-	 * @property {Data} [issuerData] Data defined by issuer.
-	 */
-
-	/**
-	 * @callback ReadIssuerExtraDataCallback
-	 * @param {ReadIssuerExtraDataResponse} [response]
-	 * @param {TangemSdkError} [error] Error
-	 * @return {void}
-	 */
-
-	/**
-	 * This task retrieves Issuer Extra Data field and its issuer’s signature.
-	 * Issuer Extra Data is never changed or parsed from within the Tangem COS. The issuer defines purpose of use,
-	 * format and payload of Issuer Data. . For example, this field may contain photo or
-	 * biometric information for ID card product. Because of the large size of Issuer_Extra_Data,
-	 * a series of these commands have to be executed to read the entire Issuer_Extra_Data.
-	 * @param {string} [cardId] Unique Tangem card ID number.
-	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {ReadIssuerExtraDataCallback} [callback] Callback for result
-	 */
-	readIssuerExtraData: function (cardId, initialMessage, callback) {
-		exec(
-			'readIssuerExtraData',
-			{
-				cardId: cardId,
-				initialMessage: initialMessage
-			},
-			callback
-		);
-	},
-
-	/**
-	 * This task writes Issuer Extra Data field and its issuer’s signature.
-	 * Issuer Extra Data is never changed or parsed from within the Tangem COS.
-	 * The issuer defines purpose of use, format and payload of Issuer Data.
-	 * For example, this field may contain a photo or biometric information for ID card products.
-	 * Because of the large size of Issuer_Extra_Data, a series of these commands have to be executed
-	 * to write entire Issuer_Extra_Data.
-	 * @param {Data} issuerData Data provided by issuer.
-	 * @param {Data} startingSignature Issuer’s signature with Issuer Data Private Key of `cardId`,
-	 * `issuerDataCounter` (if flags Protect_Issuer_Data_Against_Replay and
-	 * Restrict_Overwrite_Issuer_Extra_Data are set in `SettingsMask`) and size of `issuerData`.
-	 * @param {Data} finalizingSignature Issuer’s signature with Issuer Data Private Key of `cardId`,
-	 * `issuerData` and `issuerDataCounter` (the latter one only if flags Protect_Issuer_Data_Against_Replay
-	 * and Restrict_Overwrite_Issuer_Extra_Data are set in `SettingsMask`).
-	 * @param {number} [issuerDataCounter] An optional counter that protect issuer data against replay attack.
-	 * @param {string} [cardId] Unique Tangem card ID number.
-	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {SuccessCallback} [callback] Callback for result
-	 */
-	writeIssuerExtraData: function (issuerData, startingSignature, finalizingSignature, issuerDataCounter, cardId, initialMessage, callback) {
-		exec(
-			'writeIssuerExtraData',
-			{
-				issuerData: issuerData,
-				startingSignature: startingSignature,
-				finalizingSignature: finalizingSignature,
-				issuerDataCounter: issuerDataCounter,
-				cardId: cardId,
-				initialMessage: initialMessage
-			},
-			callback
-		);
-	},
-
-	/**
-	 * @typedef {Object} ReadUserDataResponse
-	 * @property {string} cardId Unique Tangem card ID number.
-	 * @property {Data} userData Data defined by user's App.
-	 * @property {Data} userProtectedData Counter initialized by user's App and increased on every signing of new transaction
-	 * @property {number} userCounter Counter initialized by user's App and increased on every signing of new transaction
-	 * @property {number} userProtectedCounter Counter initialized by user's App (confirmed by PIN2) and increased on every signing of new transaction
-	 */
-
-	/**
-	 * @callback ReadUserDataCallback
-	 * @param {ReadUserDataResponse} [response]
-	 * @param {TangemSdkError} [error] Error
-	 * @return {void}
-	 */
-
-	/**
-	 * This command return two up to 512-byte User_Data, User_Protected_Data and two counters User_Counter and
-	 * User_Protected_Counter fields.
-	 * User_Data and User_ProtectedData are never changed or parsed by the executable code the Tangem COS.
-	 * The App defines purpose of use, format and it's payload. For example, this field may contain cashed information
-	 * from blockchain to accelerate preparing new transaction.
-	 * User_Counter and User_ProtectedCounter are counters, that initial values can be set by App and increased on every signing
-	 * of new transaction (on SIGN command that calculate new signatures). The App defines purpose of use.
-	 * For example, this fields may contain blockchain nonce value.
-	 *
-	 * @param {string} [cardId] Unique Tangem card ID number.
-	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {ReadUserDataCallback} [callback] Callback for result
-	 */
-	readUserData: function (cardId, initialMessage, callback) {
-		exec(
-			'readUserData',
-			{ cardId: cardId, initialMessage: initialMessage },
-			callback
-		);
-	},
-
-	/**
-	 * This command writes some UserData, and UserCounter fields.
-	 * User_Data are never changed or parsed by the executable code the Tangem COS.
-	 * The App defines purpose of use, format and it's payload. For example, this field may contain cashed information
-	 * from blockchain to accelerate preparing new transaction.
-	 * User_Counter are counter, that initial value can be set by App and increased on every signing
-	 * of new transaction (on SIGN command that calculate new signatures). The App defines purpose of use.
-	 * For example, this fields may contain blockchain nonce value.
-	 * Writing of UserCounter and UserData is protected only by PIN1.
-	 *
-	 * @param {Data} userData Data defined by user’s App
-	 * @param {number} userCounter: Counter initialized by user’s App and increased on every signing of new transaction.
-	 *  If nil, the current counter value will not be overwritten.
-	 * @param {string} [cardId] Unique Tangem card ID number.
-	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {SuccessCallback} [callback] Callback for result
-	 */
-	writeUserData: function (userData, userCounter, cardId, initialMessage, callback) {
-		exec(
-			'writeUserData',
-			{
-				userData: userData,
-				userCounter: userCounter,
-				cardId: cardId,
-				initialMessage: initialMessage
-			},
-			callback
-		);
-	},
-
-	/**
-	 * This command writes some UserProtectedData and UserProtectedCounter fields.
-	 * User_ProtectedData are never changed or parsed by the executable code the Tangem COS.
-	 * The App defines purpose of use, format and it's payload. For example, this field may contain cashed information
-	 * from blockchain to accelerate preparing new transaction.
-	 * User_ProtectedCounter are counter, that initial value can be set by App and increased on every signing
-	 * of new transaction (on SIGN command that calculate new signatures). The App defines purpose of use.
-	 * For example, this fields may contain blockchain nonce value.
-	 *
-	 * UserProtectedCounter and UserProtectedData is protected by PIN1 and need additionally PIN2 to confirmation.
-	 *
-	 * @param {Data} userProtectedData Data defined by user’s App (confirmed by PIN2)
-	 * @param {number} userProtectedCounter Counter initialized by user’s App (confirmed by PIN2) and increased on every signing of new transaction.
-	 *  If nil, the current counter value will not be overwritten.
-	 * @param {string} [cardId] Unique Tangem card ID number.
-	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
-	 * @param {SuccessCallback} [callback] Callback for result
-	 */
-	writeUserProtectedData: function (userProtectedData, userProtectedCounter, cardId, initialMessage, callback) {
-		exec(
-			'writeUserProtectedData',
-			{
-				userProtectedData: userProtectedData,
-				userProtectedCounter: userProtectedCounter,
-				cardId: cardId,
-				initialMessage: initialMessage
-			},
 			callback
 		);
 	},
@@ -737,20 +484,12 @@ var TangemSdk = {
  * @param {CommonCallback} [callback] Callback
  */
 function exec(command, options, callback) {
-	Object.keys(options).forEach(function (key) {
-		if (typeof options[key] === 'undefined') {
-			delete options[key];
-		}
-		if (typeof options[key] === 'object') {
-			options[key] = JSON.stringify(options[key]);
-		}
-	});
 	cordovaExec(
 		function (result) {
-			callback && callback(JSON.parse(result));
+			callback && typeof callback === 'function' && callback(JSON.parse(result));
 		},
 		function (error) {
-			callback && callback(undefined, JSON.parse(error));
+			callback && typeof callback === 'function' && callback(undefined, JSON.parse(error));
 		},
 		'TangemSdkPlugin',
 		command,
