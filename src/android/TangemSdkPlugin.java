@@ -1,7 +1,6 @@
 package tangem_sdk;
 
 import android.app.Activity;
-import android.content.Context;
 import com.tangem.TangemSdk;
 import com.tangem.common.core.Config;
 import com.tangem.common.json.MoshiJsonConverter;
@@ -14,8 +13,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.ref.WeakReference;
-
 /**
  * This class echoes a string called from JavaScript.
  */
@@ -23,13 +20,11 @@ public class TangemSdkPlugin extends CordovaPlugin {
 
     private TangemSdk sdk;
     private NfcManager nfcManager;
-    private WeakReference<Context> wActivityContext;
 
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
 
-        wActivityContext = new WeakReference<>(cordova.getContext());
         Activity activity = cordova.getActivity();
         nfcManager = new NfcManager();
         nfcManager.setCurrentActivity(activity);
@@ -39,7 +34,6 @@ public class TangemSdkPlugin extends CordovaPlugin {
 
         SecureStorage storage = AndroidSecureStorageKt.create(SecureStorage.Companion, activity);
         Config config = new Config();
-        config.setLinkedTerminal(false);
 
         sdk = new TangemSdk(nfcManager.getReader(), viewDelegate, storage, config);
         nfcManager.onStart();
@@ -93,21 +87,6 @@ public class TangemSdkPlugin extends CordovaPlugin {
         } catch (Exception ex) {
             MoshiJsonConverter converter = MoshiJsonConverter.Companion.getINSTANCE();
             callbackContext.error(converter.prettyPrint(ex, "  "));
-        }
-    }
-
-    private PluginError createExceptionError(Exception ex) {
-        return new PluginError(9999, ex.toString());
-    }
-
-    private static class PluginError {
-
-        public int code;
-        public String localizedDescription;
-
-        public PluginError(int code, String localizedDescription) {
-            this.code = code;
-            this.localizedDescription = localizedDescription;
         }
     }
 }
