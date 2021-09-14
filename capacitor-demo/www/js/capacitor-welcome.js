@@ -1,12 +1,10 @@
 window.customElements.define('capacitor-welcome', class extends HTMLElement {
-  constructor() {
-    super();
+	constructor() {
+		super();
 
-    Capacitor.Plugins.SplashScreen.hide();
+		const root = this.attachShadow({mode: 'open'});
 
-    const root = this.attachShadow({ mode: 'open' });
-
-    root.innerHTML = `
+		root.innerHTML = `
     <style>
       :host {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
@@ -27,6 +25,10 @@ window.customElements.define('capacitor-welcome', class extends HTMLElement {
         border-radius: 3px;
         text-decoration: none;
         cursor: pointer;
+      }
+      .area {
+        width: 90%;
+        height: 60vh;
       }
       main {
         padding: 15px;
@@ -61,60 +63,60 @@ window.customElements.define('capacitor-welcome', class extends HTMLElement {
 
         <p><button class="button" id="scan-card">Scan card</button></p>
         <p><button class="button" id="sign">Sign</button></p>
-        <textarea id="log"></textarea>   
+        <textarea class="area" id="log"></textarea>   
       </main>
     </div>
     `
-  }
+	}
 
-  connectedCallback() {
-    const self = this;
+	connectedCallback() {
+		const self = this;
 
-    let cardId;
-    let walletPublicKey;
+		let cardId;
+		let walletPublicKey;
 
-    function setLog(value) {
-      const text = document.getElementById("log");
-      if (text) {
-        text.value(value);
-      }
-    }
+		function setLog(result, error) {
+			const text = self.shadowRoot.querySelector('#log');
+			text.value = JSON.stringify(result || error);
+		}
 
-    function callback() {
-      return function (result, error) {
-        setLog(result, error)
-      }
-    }
+		function callback() {
+			return function (result, error) {
+				setLog(result, error);
+			}
+		}
 
-    self.shadowRoot.querySelector('#scan-card')
-        .addEventListener('click', async function(e) {
-          TangemSdk.scanCard(undefined, function (response, error) {
-            if (response) {
-              cardId = response.cardId;
-              if (response.wallets.length > 0) {
-                walletPublicKey = response.wallets[0].publicKey;
-              }
-            }
-          });
-        })
-    self.shadowRoot.querySelector('#sign')
-        .addEventListener('click', async function(e) {
-            TangemSdk.sign(
-              ["44617461207573656420666f722068617368696e67", "44617461207573656420666f722068617368696e67"],
-              walletPublicKey,
-              cardId,
-              undefined,
-              callback
-            );
-        })
-  }
+		self.shadowRoot.querySelector('#scan-card')
+			.addEventListener('click', async function (e) {
+				TangemSdk.scanCard(undefined, function (result, error) {
+					setLog(result, error);
+					if (result) {
+						cardId = result.cardId;
+						if (result.wallets.length > 0) {
+							walletPublicKey = result.wallets[0].publicKey;
+						}
+					}
+				});
+			})
+		self.shadowRoot.querySelector('#sign')
+			.addEventListener('click', async function (e) {
+				TangemSdk.sign(
+					["44617461207573656420666f722068617368696e67", "44617461207573656420666f722068617368696e67"],
+					walletPublicKey,
+          undefined,
+					cardId,
+					undefined,
+					callback
+				);
+			})
+	}
 });
 
 window.customElements.define('capacitor-welcome-titlebar', class extends HTMLElement {
-  constructor() {
-    super();
-    const root = this.attachShadow({ mode: 'open' });
-    root.innerHTML = `
+	constructor() {
+		super();
+		const root = this.attachShadow({mode: 'open'});
+		root.innerHTML = `
     <style>
       :host {
         position: relative;
@@ -133,5 +135,5 @@ window.customElements.define('capacitor-welcome-titlebar', class extends HTMLEle
     </style>
     <slot></slot>
     `;
-  }
+	}
 });

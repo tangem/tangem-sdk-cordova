@@ -34,13 +34,6 @@ var app = {
 
         document.getElementById('buttonScanCard').addEventListener('click', onScanCard);
         document.getElementById('buttonSign').addEventListener('click', onSign);
-        document.getElementById('buttonReadIssuerData').addEventListener('click', onReadIssuerData);
-        document.getElementById('buttonWriteIssuerData').addEventListener('click', onWriteIssuerData);
-        document.getElementById('buttonReadIssuerExtraData').addEventListener('click', onReadIssuerExtraData);
-        document.getElementById('buttonWriteIssuerExtraData').addEventListener('click', onWriteIssuerExtraData);
-        document.getElementById('buttonReadUserData').addEventListener('click', onReadUserData);
-        document.getElementById('buttonWriteUserData').addEventListener('click', onWriteUserData);
-        document.getElementById('buttonWriteUserProtectedData').addEventListener('click', onWriteUserProtectedData);
         document.getElementById('buttonCreateWallet').addEventListener('click', onCreateWallet);
         document.getElementById('buttonPurgeWallet').addEventListener('click', onPurgeWallet);
         document.getElementById('buttonSetPassCode').addEventListener('click', onSetPassCode);
@@ -128,51 +121,6 @@ var app = {
             var walletPublicKey = getElementValue('signWalletPublicKey');
             var cardId = getElementValue('signCardId');
             TangemSdk.sign(hashes, walletPublicKey, undefined, cardId, undefined, callback('taSign'));
-        }
-
-        function onReadIssuerData() {
-            TangemSdk.readIssuerData(undefined, undefined, callback('taReadIssuerData'));
-        }
-
-        function onWriteIssuerData() {
-            var data = getElementValue('IssuerData');
-            var signature = getElementValue('issuerDataSignature');
-            TangemSdk.writeIssuerData(data, signature, 0, undefined, undefined, callback('taWriteIssuerData'));
-        }
-
-        function onReadIssuerExtraData() {
-            TangemSdk.readIssuerExtraData(undefined, undefined, callback('taReadIssuerExtraData'));
-        }
-
-        function onWriteIssuerExtraData() {
-            var data = getElementValue('IssuerExtraData');
-            var startingSignature = getElementValue('issuerExtraDataStartingSignature');
-            var finalizingSignature = getElementValue('issuerExtraDataFinalizingSignature');
-            TangemSdk.writeIssuerExtraData(
-              data,
-              startingSignature,
-              finalizingSignature,
-              undefined,
-              undefined,
-              undefined,
-              callback('taWriteIssuerExtraData')
-            );
-        }
-
-        function onReadUserData() {
-            TangemSdk.readUserData(undefined, undefined, callback('taReadUserData'));
-        }
-
-        function onWriteUserData() {
-            var data = getElementValue('userData');
-            var counter = parseInt(getElementValue('userDataCounter'));
-            TangemSdk.writeUserData(data, counter, undefined, undefined, callback('taWriteUserData'));
-        }
-
-        function onWriteUserProtectedData() {
-            var data = getElementValue('userProtectedData');
-            var counter = parseInt(getElementValue('userProtectedDataCounter'));
-            TangemSdk.writeUserProtectedData(data, counter, undefined, undefined, callback('taWriteUserProtectedData'));
         }
 
         function onCreateWallet() {

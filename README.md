@@ -16,14 +16,6 @@ The Tangem card is a self-custodial hardware wallet for blockchain assets. The m
     - [Wallet](#wallet)
         - [Create Wallet](#create-wallet)
         - [Purge Wallet](#purge-wallet)
-    - [Issuer data](#issuer-data)
-        - [Write issuer data](#write-issuer-data)
-        - [Write issuer extra data](#write-issuer-extra-data)
-        - [Read issuer data](#read-issuer-data)
-        - [Read issuer extra data](#read-issuer-extra-data)
-    - [User data](#user-data)
-        - [Write user data](#write-user-data)
-        - [Read user data](#read-user-data)
     - [PIN codes](#pin-codes)    
 
 ## Getting Started
@@ -106,11 +98,11 @@ Cordova platform should do all the configurations by itself, but if you install 
 <activity android:name="MainActivity" android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
 
 <intent-filter>
-    <action android:name=“android.nfc.action.TECH_DISCOVERED” />
+    <action android:name="android.nfc.action.TECH_DISCOVERED" />
 </intent-filter>
 <meta-data
-    android:name=“android.nfc.action.TECH_DISCOVERED”
-    android:resource=“@xml/tech_filter” />
+    android:name="android.nfc.action.TECH_DISCOVERED"
+    android:resource="@xml/tech_filter" />
 ```
 
 ### Usage
@@ -180,8 +172,9 @@ Method `tangemSdk.createWallet()` will create a new wallet on the card. A key pa
 
 | Parameter | Description |
 | ------------ | ------------ |
-| config | *(Optional)* Configuration for wallet that should be created (blockchain name, token...). This parameter available for cards with COS v.4.0 and higher. For earlier versions it will be ignored |
-| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
+| curve | Wallet's elliptic curve |
+| isPermanent | If this wallet can be deleted or not. |
+| cardId | If cardId is passed, the sign command will be performed only if the card  |
 | initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
 | callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
 
@@ -204,7 +197,7 @@ Method `tangemSdk.purgeWallet()` delete wallet data.
 | Parameter | Description |
 | ------------ | ------------ |
 | walletPublicKey | Public key of wallet that should sign hashes. |
-| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
+| cardId | If cardId is passed, the sign command will be performed only if the card  |
 | initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
 | callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
 
@@ -218,150 +211,6 @@ function callback(result, error) {
 }
 
 TangemSdk.purgeWallet (walletPublicKey, cardId, initialMessage, callback);
-```
-
-#### Issuer data
-Card has a special 512-byte memory block to securely store and update information in COS. For example, this mechanism could be employed for enabling off-line validation of the wallet balance and attesting of cards by the issuer (in addition to Tangem’s attestation). The issuer should define the purpose of use, payload, and format of Issuer Data field. Note that Issuer_Data is never changed or parsed by the executable code the Tangem COS.
-
-The issuer has to generate single Issuer Data Key pair `Issuer_Data_PublicKey` / `Issuer_Data_PrivateKey`, same for all issuer’s cards. The private key Issuer_Data_PrivateKey is permanently stored in a secure back-end of the issuer (e.g. HSM). The non-secret public key Issuer_Data_PublicKey is stored both in COS (during personalization) and issuer’s host application that will use it to validate Issuer_Data field.
-
-##### Write issuer data
-Method `tangemSdk.writeIssuerData(cardId: cardId,issuerData: sampleData, issuerDataSignature: dataSignature, issuerDataCounter: counter)` writes 512-byte Issuer_Data field to the card.
-
-**Arguments:**
-
-| Parameter | Description |
-| ------------ | ------------ |
-| issuerData | Data to be written to the card |
-| issuerDataSignature | Issuer’s signature of issuerData with `Issuer_Data_PrivateKey` |
-| issuerDataCounter | An optional counter that protect issuer data against replay attack. When flag Protect_Issuer_Data_Against_Replay set in the card configuration then this value is mandatory and must increase on each execution of `writeIssuerData` command.  |
-| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
-| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
-| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
-
-```js
-TangemSdk.writeIssuerData(
-  issuerData, 
-  issuerDataSignature,
-  issuerDataCounter,
-  cardId,
-  initialMessage,
-  callback
-);
-```
-
-##### Write issuer extra data
-If 512 bytes are not enough, you can use method `tangemSdk.writeIssuerExtraData(cardId: cardId, issuerData: sampleData,startingSignature: startSignature,finalizingSignature: finalSig,issuerDataCounter: newCounter)` to save up to 40 kylobytes.
-
-**Arguments:**
-
-| Parameter | Description |
-| ------------ | ------------ |
-| issuerData | Data to be written to the card |
-| startingSignature | Issuer’s signature of `SHA256(cardId | Size)` or `SHA256(cardId | Size | issuerDataCounter)` with `Issuer_Data_PrivateKey` |
-| finalizingSignature | Issuer’s signature of `SHA256(cardId | issuerData)` or or `SHA256(cardId | issuerData | issuerDataCounter)` with `Issuer_Data_PrivateKey` |
-| issuerDataCounter | An optional counter that protect issuer data against replay attack. When flag Protect_Issuer_Data_Against_Replay set in the card configuration then this value is mandatory and must increase on each execution of `writeIssuerData` command.  |
-| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
-| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
-| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
-
-```js
-
-TangemSdk.writeIssuerExtraData(
-  issuerData, 
-  startingSignature,
-  finalizingSignature,
-  issuerDataCounter,
-  cardId,
-  initialMessage,
-  callback
-);
-```
-
-##### Read issuer data
-Method `tangemSdk.readIssuerData()` returns 512-byte Issuer_Data field and its issuer’s signature.
-
-**Arguments:**
-
-| Parameter | Description |
-| ------------ | ------------ |
-| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
-| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
-| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
-
-```js
-TangemSdk.readUserData(cardId, initialMessage, callback);
-```
-
-##### Read issuer extra data
-Method `tangemSdk.readIssuerExtraData()` ruturns Issuer_Extra_Data field.
-
-**Arguments:**
-
-| Parameter | Description |
-| ------------ | ------------ |
-| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
-| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
-| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
-
-
-```js
-
-TangemSdk.readIssuerData(cardId, initialMessage, callback);
-```
-
-#### User data
-##### Write user data
-Method `tangemSdk.writeUserData()` write some of User_Data and User_Counter fields.
-User_Data is never changed or parsed by the executable code the Tangem COS. The App defines purpose of use, format and it's payload. For example, this field may contain cashed information from blockchain to accelerate preparing new transaction.
-
-**Arguments:**
-
-| Parameter | Description |
-| ------------ | ------------ |
-| userData | User data |
-| userCounter | Counters, that initial values can be set by App and increased on every signing of new transaction (on SIGN command that calculate new signatures). The App defines purpose of use. For example, this fields may contain blockchain nonce value. |
-| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
-| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
-| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
-
-```js
-TangemSdk.writeUserData(userData, userCounter, cardId, initialMessage, callback)
-```
-
-**Arguments:**
-
-| Parameter | Description |
-| ------------ | ------------ |
-| userProtectedData | User data |
-| userProtectedCounter | Counter initialized by user’s App (confirmed by PIN2) and increased on every signing of new transaction. |
-| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
-| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
-| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
-
-```js
-TangemSdk.writeUserProtectedData(
-  userProtectedData, 
-  userProtectedCounter, 
-  cardId, 
-  initialMessage, 
-  callback
-);
-```
-
-##### Read user data
-Method `tangemSdk.readUserData()` returns User Data
-
-**Arguments:**
-
-| Parameter | Description |
-| ------------ | ------------ |
-| cardId | *(Optional)* If cardId is passed, the sign command will be performed only if the card  |
-| initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
-| callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
-
-```js
-TangemSdk.readIssuerData(cardId, initialMessage, callback);
 ```
 
 #### Pin codes
