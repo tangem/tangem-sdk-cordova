@@ -45,7 +45,6 @@
             <pods use-frameworks="true">
                 <pod name="TangemSdk" spec="~> 3.1.0" />
             </pods>
-                <preference name="deployment-target" value="11.0" />
         </podspec>
         <config-file parent="/*" target="config.xml">
             <feature name="TangemSdkPlugin">
