@@ -42,13 +42,10 @@
 
     <platform name="ios">
         <podspec>
-            <config>
-                <source url="https://github.com/CocoaPods/Specs.git" />
-            </config>
             <pods use-frameworks="true">
-                <!--pod name="TangemSdk" spec="~> 3.0.2" /-->
-                <pod name="TangemSdk" git="https://github.com/tangem/tangem-sdk-ios" tag="develop-55" />
+                <pod name="TangemSdk" spec="~> 3.1.0" />
             </pods>
+                <preference name="deployment-target" value="11.0" />
         </podspec>
         <config-file parent="/*" target="config.xml">
             <feature name="TangemSdkPlugin">

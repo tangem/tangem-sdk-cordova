@@ -1,6 +1,8 @@
 import TangemSdk
 
 @objc(TangemSdkPlugin) class TangemSdkPlugin: CDVPlugin {
+    
+    @available(iOS 13.0, *)
     private lazy var sdk: TangemSdk = {
         return TangemSdk()
     }()
@@ -8,12 +10,7 @@ import TangemSdk
     override func pluginInitialize() {
     }
 
-    @objc(scanCard:) func scanCard(command: CDVInvokedUrlCommand) {
-        sdk.scanCard(initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
-            self?.handleResult(result, callbackId: command.callbackId)
-        }
-    }
-
+    @available(iOS 13.0, *)
     @objc(readIssuerData:) func readIssuerData(command: CDVInvokedUrlCommand) {
         sdk.readIssuerData(cardId: command.params?.getArg(.cardId),
                            initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
@@ -21,6 +18,7 @@ import TangemSdk
         }
     }
 
+    @available(iOS 13.0, *)
     @objc(writeIssuerData:) func writeIssuerData(command: CDVInvokedUrlCommand) {
         let params = command.params
         guard let issuerData: Data = params?.getArg(.issuerData),
@@ -38,6 +36,7 @@ import TangemSdk
         }
     }
 
+    @available(iOS 13.0, *)
     @objc(readIssuerExtraData:) func readIssuerExtraData(command: CDVInvokedUrlCommand) {
         sdk.readIssuerExtraData(cardId: command.params?.getArg(.pin1),
                                 initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
@@ -45,6 +44,7 @@ import TangemSdk
         }
     }
 
+    @available(iOS 13.0, *)
     @objc(writeIssuerExtraData:) func writeIssuerExtraData(command: CDVInvokedUrlCommand) {
         let params = command.params
         guard let issuerData: Data = params?.getArg(.issuerData),
@@ -64,6 +64,7 @@ import TangemSdk
         }
     }
 
+    @available(iOS 13.0, *)
     @objc(readUserData:) func readUserData(command: CDVInvokedUrlCommand) {
         sdk.readUserData(cardId: command.params?.getArg(.cardId),
                          initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
@@ -71,6 +72,7 @@ import TangemSdk
         }
     }
 
+    @available(iOS 13.0, *)
     @objc(writeUserData:) func writeUserData(command: CDVInvokedUrlCommand) {
         let params = command.params
         guard let userData: Data = params?.getArg(.userData) else {
@@ -86,6 +88,7 @@ import TangemSdk
         }
     }
 
+    @available(iOS 13.0, *)
     @objc(writeUserProtectedData:) func writeUserProtectedData(command: CDVInvokedUrlCommand) {
         let params = command.params
         guard let userProtectedData: Data = params?.getArg(.userProtectedData) else {
@@ -101,6 +104,7 @@ import TangemSdk
         }
     }
 
+    @available(iOS 13.0, *)
     @objc(runJSONRPCRequest:) func runJSONRPCRequest(command: CDVInvokedUrlCommand) {
         let params = command.params
         guard let request: String = params?.getArg(.JSONRPCRequest) else {
@@ -127,6 +131,7 @@ import TangemSdk
         commandDelegate.send(cdvresult, callbackId: callbackId)
     }
 
+    @available(iOS 13.0, *)
     private func handleResult<TResult: JSONStringConvertible>(_ result: Result<TResult, TangemSdkError>, callbackId: String) {
         var cdvresult: CDVPluginResult
         switch result {
@@ -176,6 +181,7 @@ fileprivate enum ArgKey: String {
     case JSONRPCRequest
 }
 
+@available(iOS 13.0, *)
 fileprivate extension Dictionary where Key == String, Value == Any {
     func getArg<T: Decodable>(_ key: ArgKey) -> T? {
         if let value = self[key.rawValue] {
@@ -197,6 +203,7 @@ fileprivate extension Dictionary where Key == String, Value == Any {
         }
     }
 
+    @available(iOS 13.0, *)
     private func decodeObject<T: Decodable>(_ value: Any) -> T? {
         if let json = value as? String, let jsonData = json.data(using: .utf8) {
             do {
@@ -229,6 +236,7 @@ fileprivate struct PluginError: Encodable {
     }
 }
 
+@available(iOS 13.0, *)
 fileprivate extension TangemSdkError {
     func toPluginError() -> PluginError {
         return PluginError(code: self.code, localizedDescription: self.localizedDescription)
