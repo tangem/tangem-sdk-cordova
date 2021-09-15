@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="tangem-sdk" version="0.4.0" xmlns="http://apache.org/cordova/ns/plugins/1.0">
+<plugin id="tangem-sdk" version="0.6.0" xmlns="http://apache.org/cordova/ns/plugins/1.0">
 
     <name>TangemSdkPlugin</name>
     <description>Plugin description</description>
@@ -15,7 +15,6 @@
         <framework custom="true" src="src/android/plugin-build.gradle" type="gradleReference" />
 
         <source-file src="src/android/TangemSdkPlugin.java" target-dir="src/tangem_sdk" />
-        <source-file src="src/android/FieldParser.java" target-dir="src/tangem_sdk" />
         <source-file src="src/android/xml/tech_filter.xml" target-dir="src/main/res/xml" />
 
         <config-file parent="/*" target="res/xml/config.xml">
@@ -43,11 +42,8 @@
 
     <platform name="ios">
         <podspec>
-            <config>
-                <source url="https://github.com/CocoaPods/Specs.git" />
-            </config>
             <pods use-frameworks="true">
-                <pod name="TangemSdk" spec="~> 3.0.2" />
+                <pod name="TangemSdk" spec="~> 3.1.0" />
             </pods>
         </podspec>
         <config-file parent="/*" target="config.xml">
