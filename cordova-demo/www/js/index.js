@@ -33,15 +33,18 @@ var app = {
         document.getElementById('app').setAttribute('style', 'display:block;');
 
         document.getElementById('buttonScanCard').addEventListener('click', onScanCard);
-        document.getElementById('buttonSign').addEventListener('click', onSign);
+        document.getElementById('buttonSignHash').addEventListener('click', onSignHash);
+        document.getElementById('buttonSignHashes').addEventListener('click', onSignHashes);
         document.getElementById('buttonCreateWallet').addEventListener('click', onCreateWallet);
         document.getElementById('buttonPurgeWallet').addEventListener('click', onPurgeWallet);
         document.getElementById('buttonSetPassCode').addEventListener('click', onSetPassCode);
         document.getElementById('buttonSetAccessCode').addEventListener('click', onSetAccessCode);
+        document.getElementById('buttonResetUserCodes').addEventListener('click', onResetUserCodes);
         document.getElementById('buttonReadFiles').addEventListener('click', onReadFiles);
         document.getElementById('buttonWriteFiles').addEventListener('click', onWriteFiles);
         document.getElementById('buttonDeleteFiles').addEventListener('click', onDeleteFiles);
         document.getElementById('buttonChangeFilesSettings').addEventListener('click', onChangeFilesSettings);
+        document.getElementById('buttonJsonRPCRequest').addEventListener('click', onJsonRPCRequest);
 
         function getElementValue(elementId) {
             var element = document.getElementById(elementId);
@@ -104,7 +107,14 @@ var app = {
             });
         }
 
-        function onSign() {
+	    function onSignHash() {
+		    var hash = getElementValue('hash');
+		    var walletPublicKey = getElementValue('signHashWalletPublicKey');
+		    var cardId = getElementValue('signHashCardId');
+		    TangemSdk.signHash(hash, walletPublicKey, undefined, cardId, undefined, callback('taSign'));
+	    }
+
+        function onSignHashes() {
             var hashes = [];
             var hash1 = getElementValue('hash1');
             if (hash1) {
@@ -118,9 +128,9 @@ var app = {
             if (hash3) {
                 hashes.push(hash3);
             }
-            var walletPublicKey = getElementValue('signWalletPublicKey');
-            var cardId = getElementValue('signCardId');
-            TangemSdk.sign(hashes, walletPublicKey, undefined, cardId, undefined, callback('taSign'));
+            var walletPublicKey = getElementValue('signHashesWalletPublicKey');
+            var cardId = getElementValue('signHashesCardId');
+            TangemSdk.signHashes(hashes, walletPublicKey, undefined, cardId, undefined, callback('taSign'));
         }
 
         function onCreateWallet() {
@@ -131,7 +141,7 @@ var app = {
         }
 
         function onPurgeWallet() {
-            var walletPublicKey = getElementValue('signWalletPublicKey');
+            var walletPublicKey = getElementValue('purgeWalletPublicKey');
             TangemSdk.purgeWallet(walletPublicKey, undefined, undefined, callback('taPurgeWallet'));
         }
 
@@ -144,6 +154,10 @@ var app = {
             var passCode = getElementValue('passCode');
             TangemSdk.setPassCode(passCode, undefined, undefined, callback('taSetPassCode'));
         }
+
+				function onResetUserCodes() {
+					TangemSdk.resetUserCodes(undefined, undefined, callback('taResetUserCodes'));
+				}
 
         function onReadFiles() {
             var readPrivateFiles = document.getElementById('ReadPrivateFiles').checked;
@@ -174,6 +188,11 @@ var app = {
             var changes = [{ fileIndex: index, settings: isPrivate }]
             TangemSdk.changeFilesSettings(changes, undefined, undefined, callback('taFilesChangeSettings'));
         }
+
+				function onJsonRPCRequest() {
+					var request = JSON.parse(getElementValue('taJsonRPCRequest'));
+					TangemSdk.runJSONRPCRequest(request, undefined, undefined, callback('taJsonRPCResponse'))
+				}
     }
 };
 

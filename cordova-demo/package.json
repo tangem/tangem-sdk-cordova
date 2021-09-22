@@ -6,7 +6,6 @@
       "tangem-sdk": {}
     },
     "platforms": [
-      "ios",
       "android"
     ]
   },

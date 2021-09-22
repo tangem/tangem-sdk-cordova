@@ -29,7 +29,24 @@
             </section>
 
             <section>
-                <h2>Sign</h2>
+                <h2>Sign Hash</h2>
+                <form class="request">
+                    <label for="hash">Hash</label>
+                    <input type="text" id="hash" value="44617461207573656420666f722068617368696e67"/>
+                    <label for="signHashWalletPublicKey">Wallet Public Key</label>
+                    <input type="text" class="walletPublicKey" id="signHashWalletPublicKey"/>
+                    <label for="signHashCardId">Card Id</label>
+                    <input type="text" class="cardId" id="signHashCardId"/>
+                </form>
+                <form class="response">
+                    <label for="taSignHash">Response:</label>
+                    <textarea id="taSignHash"></textarea>
+                </form>
+                <button id="buttonSignHash" type="button">Sign</button>
+            </section>
+
+            <section>
+                <h2>Sign Hashes</h2>
                 <form class="request">
                     <label for="hash1">Hash 1</label>
                     <input type="text" id="hash1" value="44617461207573656420666f722068617368696e67"/>
@@ -37,16 +54,16 @@
                     <input type="text" id="hash2" value="4461746120666f7220757365642068617368696e67"/>
                     <label for="hash3">Hash 3</label>
                     <input type="text" id="hash3"/>
-                    <label for="signWalletPublicKey">Wallet Public Key</label>
-                    <input type="text" class="walletPublicKey" id="signWalletPublicKey"/>
-                    <label for="signCardId">Card Id</label>
-                    <input type="text" class="cardId" id="signCardId"/>
+                    <label for="signHashesWalletPublicKey">Wallet Public Key</label>
+                    <input type="text" class="walletPublicKey" id="signHashesWalletPublicKey"/>
+                    <label for="signHashesCardId">Card Id</label>
+                    <input type="text" class="cardId" id="signHashesCardId"/>
                 </form>
                 <form class="response">
-                    <label for="taSign">Response:</label>
-                    <textarea id="taSign"></textarea>
+                    <label for="taSignHashes">Response:</label>
+                    <textarea id="taSignHashes"></textarea>
                 </form>
-                <button id="buttonSign" type="button">Sign</button>
+                <button id="buttonSignHashes" type="button">Sign</button>
             </section>
 
             <section>
@@ -55,9 +72,6 @@
                     <label>Elliptic curve
                         <select id="createWalletEllipticCurve">
                         </select>
-                    </label>
-                    <label>Is Permanent
-                        <input type="checkbox" id="createWalletIsPermanent">
                     </label>
                     <label for="createWalletCardId">Card Id</label>
                     <input type="text" class="cardId" id="createWalletCardId"/>
@@ -106,6 +120,15 @@
                     <textarea id="taSetPassCode"></textarea>
                 </form>
                 <button id="buttonSetPassCode" type="button">Set PassCode</button>
+            </section>
+
+            <section>
+                <h2>Reset User Codes</h2>
+                <form class="response">
+                    <label for="taResetUserCodes">Response:</label>
+                    <textarea id="taResetUserCodes"></textarea>
+                </form>
+                <button id="buttonResetUserCodes" type="button">Reset User Codes</button>
             </section>
 
             <section>
@@ -161,6 +184,19 @@
                     <textarea id="taChangeFilesSettings"></textarea>
                 </form>
                 <button id="buttonChangeFilesSettings" type="button">Files change settings</button>
+            </section>
+<sec
+            <section>
+                <h2>run JsonRPC</h2>
+                <form class="request">
+                    <label for="taJsonRPCRequest">Request:</label>
+                    <textarea id="taJsonRPCRequest">{ "jsonrpc": "2.0", "id": 1, "method": "scan" }</textarea>
+                </form>
+                <form class="response">
+                    <label for="taJsonRPCResponse">Response:</label>
+                    <textarea id="taJsonRPCResponse"></textarea>
+                </form>
+                <button id="buttonJsonRPCRequest" type="button">Run JsonRPC</button>
             </section>
 
         </div>

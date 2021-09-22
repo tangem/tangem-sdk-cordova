@@ -183,9 +183,8 @@ var TangemSdk = {
 	 * @param {ScanCardCallback} [callback] Callback for command
 	 */
 	scanCard: function (initialMessage, callback) {
-		jsonRPCRequest(
-			'scan',
-			{},
+		execJsonRPCRequest(
+			getJsonRPCRequest('scan'),
 			undefined,
 			initialMessage,
 			callback
@@ -193,7 +192,44 @@ var TangemSdk = {
 	},
 
 	/**
-	 * @typedef {Object} SignResponse
+	 * @typedef {Object} SignHashResponse
+	 * @property {string} cardId Unique Tangem card ID number.
+	 * @property {Data} signature Signed hash
+	 * @property {number} [totalSignedHashes] Total number of signed  hashes returned by the wallet since its creation. COS: 1.16+
+	 */
+
+	/**
+	 * The callback for success scan card.
+	 * @callback SignHashCallback
+	 * @param {SignHashCallback} [response] Signed hashes (array of resulting signatures)
+	 * @param {TangemSdkError} [error] Error
+	 * @return {void}
+	 */
+
+	/**
+	 * This method allows you to sign one hash and will return a corresponding signature.
+	 * Please note that Tangem cards usually protect the signing with a security delay
+	 * that may last up to 45 seconds, depending on a card.
+	 * It is for `SessionViewDelegate` to notify users of security delay.
+	 * Note: Wallet index works only on COS v.4.0 and higher. For previous version index will be ignored
+	 * @param {Data} hash Array of transaction hashes. It can be from one or up to ten hashes of the same length.
+	 * @param {Data} walletPublicKey Public key of wallet that should sign hashes.
+	 * @param {string} [hdPath] Public Derivation path of the wallet. Optional. COS v. 4.28 and higher
+	 * @param {string} cardId Unique Tangem card ID number.
+	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
+	 * @param {SignHashCallback} [callback] Callback for result
+	 */
+	signHash: function (hash, walletPublicKey, hdPath, cardId, initialMessage, callback) {
+		execJsonRPCRequest(
+			getJsonRPCRequest('sign_hash', { walletPublicKey: walletPublicKey, hdPath: hdPath, hash: hash }),
+			cardId,
+			initialMessage,
+			callback
+		);
+	},
+
+	/**
+	 * @typedef {Object} SignHashResponse
 	 * @property {string} cardId Unique Tangem card ID number.
 	 * @property {Data[]} signatures Signed hashes (array of resulting signatures)
 	 * @property {number} [totalSignedHashes] Total number of signed  hashes returned by the wallet since its creation. COS: 1.16+
@@ -201,8 +237,8 @@ var TangemSdk = {
 
 	/**
 	 * The callback for success scan card.
-	 * @callback SignCallback
-	 * @param {SignResponse} [response] Signed hashes (array of resulting signatures)
+	 * @callback SignHashCallback
+	 * @param {SignHashCallback} [response] Signed hashes (array of resulting signatures)
 	 * @param {TangemSdkError} [error] Error
 	 * @return {void}
 	 */
@@ -219,18 +255,13 @@ var TangemSdk = {
 	 * @param {Data[]} hashes Array of transaction hashes. It can be from one or up to ten hashes of the same length.
 	 * @param {Data} walletPublicKey Public key of wallet that should sign hashes.
 	 * @param {string} [hdPath] Public Derivation path of the wallet. Optional. COS v. 4.28 and higher
-	 * @param {string} [cardId] Unique Tangem card ID number.
+	 * @param {string} cardId Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
 	 * @param {SignCallback} [callback] Callback for result
 	 */
-	sign: function (hashes, walletPublicKey, hdPath, cardId, initialMessage, callback) {
-		jsonRPCRequest(
-			'sign_hashes',
-			{
-				walletPublicKey: walletPublicKey,
-				hdPath: hdPath,
-				hashes: hashes,
-			},
+	signHashes: function (hashes, walletPublicKey, hdPath, cardId, initialMessage, callback) {
+		execJsonRPCRequest(
+			getJsonRPCRequest('sign_hash', { walletPublicKey: walletPublicKey, hdPath: hdPath, hashes: hashes }),
 			cardId,
 			initialMessage,
 			callback
@@ -259,18 +290,13 @@ var TangemSdk = {
 	 * WalletPrivateKey is never revealed by the card and will be used by `SignCommand` and `CheckWalletCommand`.
 	 * RemainingSignature is set to MaxSignatures.
 	 * @param {EllipticCurve} curve Wallet's elliptic curve
-	 * @param {boolean} isPermanent: If this wallet can be deleted or not.
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
 	 * @param {CreateWalletCallback} [callback] Callback for result
 	 */
-	createWallet: function (curve, isPermanent, cardId, initialMessage, callback) {
-		jsonRPCRequest(
-			'create_wallet',
-			{
-				curve: curve,
-				isPermanent: isPermanent
-			},
+	createWallet: function (curve, cardId, initialMessage, callback) {
+		execJsonRPCRequest(
+			getJsonRPCRequest('create_wallet', { curve: curve }),
 			cardId,
 			initialMessage,
 			callback
@@ -289,9 +315,8 @@ var TangemSdk = {
 	 * @param {SuccessCallback} [callback] Callback for result
 	 */
 	purgeWallet: function (walletPublicKey, cardId, initialMessage, callback) {
-		jsonRPCRequest(
-			'purge_wallet',
-			{ walletPublicKey: walletPublicKey},
+		execJsonRPCRequest(
+			getJsonRPCRequest('purge_wallet',{ walletPublicKey: walletPublicKey}),
 			cardId,
 			initialMessage,
 			callback
@@ -306,13 +331,12 @@ var TangemSdk = {
 	 * @param {SuccessCallback} [callback] Callback for result
 	 */
 	setAccessCode: function (accessCode, cardId, initialMessage, callback) {
-		jsonRPCRequest(
-			'set_accesscode',
-			{ accessCode: accessCode },
+		execJsonRPCRequest(
+			getJsonRPCRequest('set_accesscode', { accessCode: accessCode }),
 			cardId,
 			initialMessage,
 			callback
-		)
+		);
 	},
 
 	/**
@@ -323,13 +347,27 @@ var TangemSdk = {
 	 * @param {SuccessCallback} [callback] Callback for result
 	 */
 	setPassCode: function (passcode, cardId, initialMessage, callback) {
-		jsonRPCRequest(
-			'set_passcode',
-			{ passcode: passcode },
+		execJsonRPCRequest(
+			getJsonRPCRequest('set_passcode',{ passcode: passcode }),
 			cardId,
 			initialMessage,
 			callback
-		)
+		);
+	},
+
+	/**
+	 * Reset all user codes
+	 * @param {string} cardId Unique Tangem card ID number.
+	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
+	 * @param {SuccessCallback} [callback] Callback for result
+	 */
+	resetUserCodes: function (cardId, initialMessage, callback) {
+		execJsonRPCRequest(
+			getJsonRPCRequest('RESET_USERCODES'),
+			cardId,
+			initialMessage,
+			callback
+		);
 	},
 
 	/**
@@ -382,12 +420,8 @@ var TangemSdk = {
 	 * @param {ReadFilesCallback} [callback] Callback for result
 	 */
 	readFiles: function (readPrivateFiles, indices, cardId, initialMessage, callback) {
-		jsonRPCRequest(
-			'read_files',
-			{
-				readPrivateFiles: readPrivateFiles,
-				indices: indices
-			},
+		execJsonRPCRequest(
+			getJsonRPCRequest('read_files', { readPrivateFiles: readPrivateFiles, indices: indices }),
 			cardId,
 			initialMessage,
 			callback
@@ -422,9 +456,8 @@ var TangemSdk = {
 	 * @param {WriteFilesCallback} [callback] Callback for result
 	 */
 	writeFiles: function (files, cardId, initialMessage, callback) {
-		jsonRPCRequest(
-			'write_files',
-			{ files: files },
+		execJsonRPCRequest(
+			getJsonRPCRequest('write_files', { files: files }) ,
 			cardId,
 			initialMessage,
 			callback
@@ -443,9 +476,8 @@ var TangemSdk = {
 	 * @param {SuccessCallback} [callback] Callback for result
 	 */
 	deleteFiles: function (indicesToDelete, cardId, initialMessage, callback) {
-		jsonRPCRequest(
-			'delete_files',
-			{ indicesToDelete: indicesToDelete },
+		execJsonRPCRequest(
+			getJsonRPCRequest('delete_files', { indicesToDelete: indicesToDelete }),
 			cardId,
 			initialMessage,
 			callback
@@ -465,14 +497,31 @@ var TangemSdk = {
 	 * @param {SuccessCallback} [callback] Callback for result
 	 */
 	changeFilesSettings: function (changes, cardId, initialMessage, callback) {
-		jsonRPCRequest(
-			'change_file_settings',
-			{ changes: changes },
+		execJsonRPCRequest(
+			getJsonRPCRequest('change_file_settings', { changes: changes }),
 			cardId,
 			initialMessage,
 			callback
-		)
+		);
+	},
 
+	/**
+	 *Allows running a custom bunch of commands in one NFC Session by creating a custom task.
+	 * Tangem SDK will start a card session, perform preflight `Read` command,
+	 * invoke the `run ` method of `CardSessionRunnable` and close the session.
+	 * You can find the current card in the `environment` property of the `CardSession`
+	 * @param {Object} jsonRequest
+	 * @param {string} [cardId] Unique Tangem card ID number.
+	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
+	 * @param {SuccessCallback} [callback] Callback for result
+	 */
+	runJSONRPCRequest: function (jsonRequest, cardId, initialMessage, callback) {
+		execJsonRPCRequest(
+			jsonRequest,
+			cardId,
+			initialMessage,
+			callback
+		);
 	}
 };
 
@@ -498,18 +547,26 @@ function exec(command, options, callback) {
 }
 
 /**
- * Execute jsonRPCRequest
- *
+ * Create JsonRPCRequest
  * @param {string} method Name of method
  * @param {Object} [params] Options for jsonRPCRequest
+ */
+function getJsonRPCRequest(method, params) {
+	return { jsonrpc: '2.0', id: '1', method: method, params: params || {} }
+}
+
+/**
+ * Execute jsonRPCRequest
+ *
+ * @param {Object} [jsonRPCRequest] jsonRPCRequest
  * @param {string} [cardId] Unique Tangem card ID number.
  * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
  * @param {CommonCallback} [callback] Callback
  */
-function jsonRPCRequest(method, params, cardId, initialMessage, callback) {
+function execJsonRPCRequest(jsonRPCRequest, cardId, initialMessage, callback) {
 	exec(
 		'runJSONRPCRequest', {
-			JSONRPCRequest: JSON.stringify({ jsonrpc: '2.0', id: '1', method: method, params: params || {} }),
+			JSONRPCRequest: JSON.stringify(jsonRPCRequest),
 			cardId: cardId,
 			initialMessage: JSON.stringify(initialMessage)
 		},
