@@ -14,13 +14,5 @@
     },
     "is_top_level": true,
     "variables": {}
-  },
-  "tangem-sdk": {
-    "source": {
-      "type": "local",
-      "path": "/Users/pavel/Projects/tangem/tangem-sdk-cordova/cordova-demo/node_modules/tangem-sdk"
-    },
-    "is_top_level": true,
-    "variables": {}
   }
 }
