@@ -135,9 +135,8 @@ var app = {
 
         function onCreateWallet() {
             var curve = getElementValue('createWalletEllipticCurve');
-            var isPermanent = document.getElementById('createWalletIsPermanent').checked;
             var cardId = getElementValue('signCardId');
-            TangemSdk.createWallet(curve, isPermanent, cardId, undefined, callback('taCreateWallet'));
+            TangemSdk.createWallet(curve, cardId, undefined, callback('taCreateWallet'));
         }
 
         function onPurgeWallet() {
@@ -183,8 +182,8 @@ var app = {
         }
 
         function onChangeFilesSettings() {
-            var index = getElementValue('ChangeFileIndex');
-            var isPrivate = document.getElementById('ChangeFilePrivate').checked ? 1 : 0;
+            var index = parseInt(getElementValue('ChangeFileIndex'));
+            var isPrivate = document.getElementById('ChangeFilePrivate').checked ? "private" : "public";
             var changes = [{ fileIndex: index, settings: isPrivate }]
             TangemSdk.changeFilesSettings(changes, undefined, undefined, callback('taFilesChangeSettings'));
         }
