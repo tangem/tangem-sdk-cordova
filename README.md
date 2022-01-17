@@ -173,7 +173,6 @@ Method `tangemSdk.createWallet()` will create a new wallet on the card. A key pa
 | Parameter | Description |
 | ------------ | ------------ |
 | curve | Wallet's elliptic curve |
-| isPermanent | If this wallet can be deleted or not. |
 | cardId | If cardId is passed, the sign command will be performed only if the card  |
 | initialMessage | *(Optional)* A custom description that shows at the beginning of the NFC session. If nil, default message will be used |
 | callback | *(Optional)* A callback function with 2 arguments: `result` and `error` |
