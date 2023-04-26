@@ -1,17 +1,14 @@
 import TangemSdk
 
 @objc(TangemSdkPlugin) class TangemSdkPlugin: CDVPlugin {
-    
-    @available(iOS 13.0, *)
-    private lazy var sdk: TangemSdk = {
-        return TangemSdk()
-    }()
+    private var _sdk: Any?
 
     override func pluginInitialize() {
     }
 
     @available(iOS 13.0, *)
     @objc(readIssuerData:) func readIssuerData(command: CDVInvokedUrlCommand) {
+        let sdk = self.sdk()
         sdk.readIssuerData(cardId: command.params?.getArg(.cardId),
                            initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
                             self?.handleResult(result, callbackId: command.callbackId)
@@ -27,6 +24,7 @@ import TangemSdk
                 return
         }
 
+        let sdk = self.sdk()
         sdk.writeIssuerData(issuerData: issuerData,
                             issuerDataSignature: issuerDataSignature,
                             issuerDataCounter: params?.getArg(.issuerDataCounter),
@@ -38,6 +36,7 @@ import TangemSdk
 
     @available(iOS 13.0, *)
     @objc(readIssuerExtraData:) func readIssuerExtraData(command: CDVInvokedUrlCommand) {
+        let sdk = self.sdk()
         sdk.readIssuerExtraData(cardId: command.params?.getArg(.pin1),
                                 initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
                                     self?.handleResult(result, callbackId: command.callbackId)
@@ -54,6 +53,7 @@ import TangemSdk
                 return
         }
 
+        let sdk = self.sdk()
         sdk.writeIssuerExtraData(issuerData: issuerData,
                                  startingSignature: startingSignature,
                                  finalizingSignature: finalizingSignature,
@@ -66,6 +66,7 @@ import TangemSdk
 
     @available(iOS 13.0, *)
     @objc(readUserData:) func readUserData(command: CDVInvokedUrlCommand) {
+        let sdk = self.sdk()
         sdk.readUserData(cardId: command.params?.getArg(.cardId),
                          initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
                             self?.handleResult(result, callbackId: command.callbackId)
@@ -80,6 +81,7 @@ import TangemSdk
             return
         }
 
+        let sdk = self.sdk()
         sdk.writeUserData(userData: userData,
                           userCounter: params?.getArg(.userCounter),
                           cardId: params?.getArg(.cardId),
@@ -96,6 +98,7 @@ import TangemSdk
                 return
         }
 
+        let sdk = self.sdk()
         sdk.writeUserProtectedData(userProtectedData: userProtectedData,
                                    userProtectedCounter: params?.getArg(.userProtectedCounter),
                                    cardId: params?.getArg(.cardId),
@@ -112,6 +115,7 @@ import TangemSdk
             return
         }
 
+        let sdk = self.sdk()
         sdk.startSession(with: request,
                          cardId: params?.getArg(.cardId),
                          initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
@@ -141,6 +145,14 @@ import TangemSdk
             cdvresult = CDVPluginResult(status: .error, messageAs: error.toPluginError().jsonDescription)
         }
         commandDelegate.send(cdvresult, callbackId: callbackId)
+    }
+    
+    @available(iOS 13.0, *)
+    private func sdk() -> TangemSdk {
+        if _sdk == nil {
+           _sdk = TangemSdk()
+        }
+        return _sdk as! TangemSdk
     }
 }
 
