@@ -3,6 +3,7 @@
 .gradle
 .platforms
 .plugins/
+.DS_Store
 
 bin/*
 !/plugins
