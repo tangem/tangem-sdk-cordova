@@ -261,7 +261,7 @@ var TangemSdk = {
 	 */
 	signHashes: function (hashes, walletPublicKey, hdPath, cardId, initialMessage, callback) {
 		execJsonRPCRequest(
-			getJsonRPCRequest('sign_hash', { walletPublicKey: walletPublicKey, hdPath: hdPath, hashes: hashes }),
+			getJsonRPCRequest('sign_hashes', { walletPublicKey: walletPublicKey, hdPath: hdPath, hashes: hashes }),
 			cardId,
 			initialMessage,
 			callback
