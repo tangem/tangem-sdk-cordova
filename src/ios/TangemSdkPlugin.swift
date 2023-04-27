@@ -151,7 +151,12 @@ import TangemSdk
     @available(iOS 13.0, *)
     private func sdk() -> TangemSdk {
         if _sdk == nil {
-           _sdk = TangemSdk()
+            let sdk = TangemSdk()
+            var c = sdk.config
+            c.attestationMode = .offline
+            c.accessCodeRequestPolicy = .alwaysWithBiometrics
+            sdk.config = c
+            _sdk = sdk
         }
         return _sdk as! TangemSdk
     }
