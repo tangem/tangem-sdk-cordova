@@ -71,6 +71,10 @@
             <string>To Scan Smart Card</string>
         </config-file>
 
+        <config-file parent="NSFaceIDUsageDescription" target="*-Info.plist">
+            <string>Use Face ID to save access codes in the app</string>
+        </config-file>
+
         <config-file parent="com.apple.developer.nfc.readersession.iso7816.select-identifiers" target="*-Info.plist">
             <array>
                 <string>A000000812010208</string>
