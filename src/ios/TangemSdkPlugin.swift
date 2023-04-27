@@ -118,7 +118,8 @@ import TangemSdk
         let sdk = self.sdk()
         sdk.startSession(with: request,
                          cardId: params?.getArg(.cardId),
-                         initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
+                         initialMessage: params?.getArg(.initialMessage),
+                         accessCode: params?.getArg(.accessCode)) {[weak self] result in
                            self?.handleJSONRPCResult(result, callbackId: command.callbackId)
         }
 
@@ -181,6 +182,7 @@ fileprivate enum ArgKey: String {
     case cardConfig
     case pinCode
     case initialMessage
+    case accessCode
     case startingSignature
     case finalizingSignature
     case online
