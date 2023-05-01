@@ -43,7 +43,7 @@
     <platform name="ios">
         <podspec>
             <pods use-frameworks="true">
-                <pod name="TangemSdk" spec="~> 3.4.0" />
+                <pod name="TangemSdk" spec="~> 3.5.0" />
             </pods>
         </podspec>
         <config-file parent="/*" target="config.xml">
