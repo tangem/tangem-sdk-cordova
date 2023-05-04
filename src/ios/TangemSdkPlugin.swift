@@ -1,16 +1,22 @@
 import TangemSdk
 
-@available(iOS 13.0, *)
 @objc(TangemSdkPlugin) class TangemSdkPlugin: CDVPlugin {
-    
-    private lazy var sdk: TangemSdk = {
-        return TangemSdk()
-    }()
+    private var _sdk: Any?
 
-    override func pluginInitialize() {
+    @available(iOS 13, *)
+    private var sdk: TangemSdk {
+        if _sdk == nil {
+            _sdk = TangemSdk()
+        }
+        return _sdk as! TangemSdk
     }
     
     @objc(runJSONRPCRequest:) func runJSONRPCRequest(command: CDVInvokedUrlCommand) {
+        guard #available(iOS 13, *) else {
+            handleOldIOS(callbackId: command.callbackId)
+            return
+        }
+        
         let params = command.params
         guard let request: String = params?.getArg(.JSONRPCRequest) else {
             handleMissingArgs(callbackId: command.callbackId)
@@ -23,9 +29,14 @@ import TangemSdk
                          accessCode: params?.getArg(.accessCode)) {[weak self] result in
                            self?.handleJSONRPCResult(result, callbackId: command.callbackId)
         }
-
     }
 
+    private func handleOldIOS(callbackId: String) {
+        let oldIOSMessage = PluginError(code: 9998, localizedDescription: "TangemSDK does not support this version of iOS")
+        let errorResult = CDVPluginResult(status: .error, messageAs: oldIOSMessage.jsonDescription)
+        commandDelegate.send(errorResult, callbackId: callbackId)
+    }
+    
     private func handleMissingArgs(callbackId: String) {
         let missingArgsError = PluginError(code: 9999, localizedDescription: "Some arguments are missing or wrong")
         let errorResult = CDVPluginResult(status: .error, messageAs:  missingArgsError.jsonDescription)
