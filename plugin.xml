@@ -43,7 +43,7 @@
     <platform name="ios">
         <podspec>
             <pods use-frameworks="true">
-                <pod name="TangemSdk" spec="~> 3.2.0" />
+                <pod name="TangemSdk" spec="~> 3.5.0" />
             </pods>
         </podspec>
         <config-file parent="/*" target="config.xml">
@@ -69,6 +69,10 @@
 
         <config-file parent="NFCReaderUsageDescription" target="*-Info.plist">
             <string>To Scan Smart Card</string>
+        </config-file>
+
+        <config-file parent="NSFaceIDUsageDescription" target="*-Info.plist">
+            <string>Use Face ID to save access codes in the app</string>
         </config-file>
 
         <config-file parent="com.apple.developer.nfc.readersession.iso7816.select-identifiers" target="*-Info.plist">

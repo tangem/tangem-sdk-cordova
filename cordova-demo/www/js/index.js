@@ -107,12 +107,12 @@ var app = {
             });
         }
 
-	    function onSignHash() {
-		    var hash = getElementValue('hash');
-		    var walletPublicKey = getElementValue('signHashWalletPublicKey');
-		    var cardId = getElementValue('signHashCardId');
-		    TangemSdk.signHash(hash, walletPublicKey, undefined, cardId, undefined, callback('taSign'));
-	    }
+        function onSignHash() {
+            var hash = getElementValue('hash');
+            var walletPublicKey = getElementValue('signHashWalletPublicKey');
+            var cardId = getElementValue('signHashCardId');
+            TangemSdk.signHash(hash, walletPublicKey, undefined, cardId, undefined, callback('taSignHash'));
+        }
 
         function onSignHashes() {
             var hashes = [];
@@ -130,7 +130,7 @@ var app = {
             }
             var walletPublicKey = getElementValue('signHashesWalletPublicKey');
             var cardId = getElementValue('signHashesCardId');
-            TangemSdk.signHashes(hashes, walletPublicKey, undefined, cardId, undefined, callback('taSign'));
+            TangemSdk.signHashes(hashes, walletPublicKey, undefined, cardId, undefined, callback('taSignHashes'));
         }
 
         function onCreateWallet() {
@@ -154,9 +154,9 @@ var app = {
             TangemSdk.setPassCode(passCode, undefined, undefined, callback('taSetPassCode'));
         }
 
-				function onResetUserCodes() {
-					TangemSdk.resetUserCodes(undefined, undefined, callback('taResetUserCodes'));
-				}
+                function onResetUserCodes() {
+                    TangemSdk.resetUserCodes(undefined, undefined, callback('taResetUserCodes'));
+                }
 
         function onReadFiles() {
             var readPrivateFiles = document.getElementById('ReadPrivateFiles').checked;
@@ -173,25 +173,25 @@ var app = {
                 },
                 issuerPublicKey: '045F16BD1D2EAFE463E62A335A09E6B2BBCBD04452526885CB679FC4D27AF1BD22F553C7DEEFB54FD3D4F361D14E6DC3F11B7D4EA183250A60720EBDF9E110CD26'
             };
-            TangemSdk.writeFiles([file], undefined, undefined, callback('onWriteFiles'));
+            TangemSdk.writeFiles([file], undefined, undefined, callback('taWriteFiles'));
         }
 
         function onDeleteFiles() {
             var index = getElementValue('DeleteFileIndex');
-            TangemSdk.deleteFiles([index], undefined, undefined, callback('taFilesDelete'));
+            TangemSdk.deleteFiles([index], undefined, undefined, callback('taDeleteFiles'));
         }
 
         function onChangeFilesSettings() {
             var index = parseInt(getElementValue('ChangeFileIndex'));
             var isPrivate = document.getElementById('ChangeFilePrivate').checked ? "private" : "public";
             var changes = [{ fileIndex: index, settings: isPrivate }]
-            TangemSdk.changeFilesSettings(changes, undefined, undefined, callback('taFilesChangeSettings'));
+            TangemSdk.changeFilesSettings(changes, undefined, undefined, callback('taChangeFilesSettings'));
         }
 
-				function onJsonRPCRequest() {
-					var request = JSON.parse(getElementValue('taJsonRPCRequest'));
-					TangemSdk.runJSONRPCRequest(request, undefined, undefined, callback('taJsonRPCResponse'))
-				}
+                function onJsonRPCRequest() {
+                    var request = JSON.parse(getElementValue('taJsonRPCRequest'));
+                    TangemSdk.runJSONRPCRequest(request, undefined, undefined, undefined, callback('taJsonRPCResponse'))
+                }
     }
 };
 

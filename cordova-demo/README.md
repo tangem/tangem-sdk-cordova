@@ -16,3 +16,12 @@ Run it!
 ```bash
 cordova run android|ios
 ```
+
+To run the demo app locally, first copy the demo project out of the plugin directory. Then `cd` into the demo directory and execute:
+
+```bash
+cordova plugin add  ../tangem-sdk-cordova/
+cordova platform add ios
+cd platforms/ios
+pod install
+```

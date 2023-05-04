@@ -187,6 +187,7 @@ var TangemSdk = {
 			getJsonRPCRequest('scan'),
 			undefined,
 			initialMessage,
+			undefined,
 			callback
 		);
 	},
@@ -224,6 +225,7 @@ var TangemSdk = {
 			getJsonRPCRequest('sign_hash', { walletPublicKey: walletPublicKey, hdPath: hdPath, hash: hash }),
 			cardId,
 			initialMessage,
+			undefined,
 			callback
 		);
 	},
@@ -261,9 +263,10 @@ var TangemSdk = {
 	 */
 	signHashes: function (hashes, walletPublicKey, hdPath, cardId, initialMessage, callback) {
 		execJsonRPCRequest(
-			getJsonRPCRequest('sign_hash', { walletPublicKey: walletPublicKey, hdPath: hdPath, hashes: hashes }),
+			getJsonRPCRequest('sign_hashes', { walletPublicKey: walletPublicKey, hdPath: hdPath, hashes: hashes }),
 			cardId,
 			initialMessage,
+			undefined,
 			callback
 		);
 	},
@@ -299,6 +302,7 @@ var TangemSdk = {
 			getJsonRPCRequest('create_wallet', { curve: curve }),
 			cardId,
 			initialMessage,
+			undefined,
 			callback
 		);
 	},
@@ -319,6 +323,7 @@ var TangemSdk = {
 			getJsonRPCRequest('purge_wallet',{ walletPublicKey: walletPublicKey}),
 			cardId,
 			initialMessage,
+			undefined,
 			callback
 		);
 	},
@@ -335,6 +340,7 @@ var TangemSdk = {
 			getJsonRPCRequest('set_accesscode', { accessCode: accessCode }),
 			cardId,
 			initialMessage,
+			undefined,
 			callback
 		);
 	},
@@ -351,6 +357,7 @@ var TangemSdk = {
 			getJsonRPCRequest('set_passcode',{ passcode: passcode }),
 			cardId,
 			initialMessage,
+			undefined,
 			callback
 		);
 	},
@@ -366,6 +373,7 @@ var TangemSdk = {
 			getJsonRPCRequest('RESET_USERCODES'),
 			cardId,
 			initialMessage,
+			undefined,
 			callback
 		);
 	},
@@ -424,6 +432,7 @@ var TangemSdk = {
 			getJsonRPCRequest('read_files', { readPrivateFiles: readPrivateFiles, indices: indices }),
 			cardId,
 			initialMessage,
+			undefined,
 			callback
 		);
 	},
@@ -460,6 +469,7 @@ var TangemSdk = {
 			getJsonRPCRequest('write_files', { files: files }) ,
 			cardId,
 			initialMessage,
+			undefined,
 			callback
 		);
 	},
@@ -480,6 +490,7 @@ var TangemSdk = {
 			getJsonRPCRequest('delete_files', { indicesToDelete: indicesToDelete }),
 			cardId,
 			initialMessage,
+			undefined,
 			callback
 		);
 	},
@@ -501,6 +512,7 @@ var TangemSdk = {
 			getJsonRPCRequest('change_file_settings', { changes: changes }),
 			cardId,
 			initialMessage,
+			undefined,
 			callback
 		);
 	},
@@ -513,13 +525,15 @@ var TangemSdk = {
 	 * @param {Object} jsonRequest
 	 * @param {string} [cardId] Unique Tangem card ID number.
 	 * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
+     * @param {String} [accessCode] Access code that will be used for a card session initialization. If undefined, Tangem SDK will handle it automatically.
 	 * @param {SuccessCallback} [callback] Callback for result
 	 */
-	runJSONRPCRequest: function (jsonRequest, cardId, initialMessage, callback) {
+	runJSONRPCRequest: function (jsonRequest, cardId, initialMessage, accessCode, callback) {
 		execJsonRPCRequest(
 			jsonRequest,
 			cardId,
 			initialMessage,
+			accessCode,
 			callback
 		);
 	}
@@ -561,14 +575,16 @@ function getJsonRPCRequest(method, params) {
  * @param {Object} [jsonRPCRequest] jsonRPCRequest
  * @param {string} [cardId] Unique Tangem card ID number.
  * @param {Message} [initialMessage] A custom description that shows at the beginning of the NFC session. If nil, default message will be used
+ * @param {String} [accessCode] Access code that will be used for a card session initialization. If undefined, Tangem SDK will handle it automatically.
  * @param {CommonCallback} [callback] Callback
  */
-function execJsonRPCRequest(jsonRPCRequest, cardId, initialMessage, callback) {
+function execJsonRPCRequest(jsonRPCRequest, cardId, initialMessage, accessCode, callback) {
 	exec(
 		'runJSONRPCRequest', {
 			JSONRPCRequest: JSON.stringify(jsonRPCRequest),
 			cardId: cardId,
-			initialMessage: JSON.stringify(initialMessage)
+			initialMessage: JSON.stringify(initialMessage),
+			accessCode: accessCode
 		},
 		function (response, error) {
 			if (response && response.result) {

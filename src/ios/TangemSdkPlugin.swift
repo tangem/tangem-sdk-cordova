@@ -1,111 +1,22 @@
 import TangemSdk
 
 @objc(TangemSdkPlugin) class TangemSdkPlugin: CDVPlugin {
+    private var _sdk: Any?
+
+    @available(iOS 13, *)
+    private var sdk: TangemSdk {
+        if _sdk == nil {
+            _sdk = TangemSdk()
+        }
+        return _sdk as! TangemSdk
+    }
     
-    @available(iOS 13.0, *)
-    private lazy var sdk: TangemSdk = {
-        return TangemSdk()
-    }()
-
-    override func pluginInitialize() {
-    }
-
-    @available(iOS 13.0, *)
-    @objc(readIssuerData:) func readIssuerData(command: CDVInvokedUrlCommand) {
-        sdk.readIssuerData(cardId: command.params?.getArg(.cardId),
-                           initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
-                            self?.handleResult(result, callbackId: command.callbackId)
-        }
-    }
-
-    @available(iOS 13.0, *)
-    @objc(writeIssuerData:) func writeIssuerData(command: CDVInvokedUrlCommand) {
-        let params = command.params
-        guard let issuerData: Data = params?.getArg(.issuerData),
-            let issuerDataSignature: Data = params?.getArg(.issuerDataSignature)  else {
-                handleMissingArgs(callbackId: command.callbackId)
-                return
-        }
-
-        sdk.writeIssuerData(issuerData: issuerData,
-                            issuerDataSignature: issuerDataSignature,
-                            issuerDataCounter: params?.getArg(.issuerDataCounter),
-                            cardId: params?.getArg(.cardId),
-                            initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
-                                self?.handleResult(result, callbackId: command.callbackId)
-        }
-    }
-
-    @available(iOS 13.0, *)
-    @objc(readIssuerExtraData:) func readIssuerExtraData(command: CDVInvokedUrlCommand) {
-        sdk.readIssuerExtraData(cardId: command.params?.getArg(.pin1),
-                                initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
-                                    self?.handleResult(result, callbackId: command.callbackId)
-        }
-    }
-
-    @available(iOS 13.0, *)
-    @objc(writeIssuerExtraData:) func writeIssuerExtraData(command: CDVInvokedUrlCommand) {
-        let params = command.params
-        guard let issuerData: Data = params?.getArg(.issuerData),
-            let startingSignature: Data = params?.getArg(.startingSignature),
-            let finalizingSignature: Data = params?.getArg(.finalizingSignature) else {
-                handleMissingArgs(callbackId: command.callbackId)
-                return
-        }
-
-        sdk.writeIssuerExtraData(issuerData: issuerData,
-                                 startingSignature: startingSignature,
-                                 finalizingSignature: finalizingSignature,
-                                 issuerDataCounter: params?.getArg(.issuerDataCounter),
-                                 cardId: params?.getArg(.cardId),
-                                 initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
-                                    self?.handleResult(result, callbackId: command.callbackId)
-        }
-    }
-
-    @available(iOS 13.0, *)
-    @objc(readUserData:) func readUserData(command: CDVInvokedUrlCommand) {
-        sdk.readUserData(cardId: command.params?.getArg(.cardId),
-                         initialMessage: command.params?.getArg(.initialMessage)) {[weak self] result in
-                            self?.handleResult(result, callbackId: command.callbackId)
-        }
-    }
-
-    @available(iOS 13.0, *)
-    @objc(writeUserData:) func writeUserData(command: CDVInvokedUrlCommand) {
-        let params = command.params
-        guard let userData: Data = params?.getArg(.userData) else {
-            handleMissingArgs(callbackId: command.callbackId)
+    @objc(runJSONRPCRequest:) func runJSONRPCRequest(command: CDVInvokedUrlCommand) {
+        guard #available(iOS 13, *) else {
+            handleOldIOS(callbackId: command.callbackId)
             return
         }
-
-        sdk.writeUserData(userData: userData,
-                          userCounter: params?.getArg(.userCounter),
-                          cardId: params?.getArg(.cardId),
-                          initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
-                            self?.handleResult(result, callbackId: command.callbackId)
-        }
-    }
-
-    @available(iOS 13.0, *)
-    @objc(writeUserProtectedData:) func writeUserProtectedData(command: CDVInvokedUrlCommand) {
-        let params = command.params
-        guard let userProtectedData: Data = params?.getArg(.userProtectedData) else {
-                handleMissingArgs(callbackId: command.callbackId)
-                return
-        }
-
-        sdk.writeUserProtectedData(userProtectedData: userProtectedData,
-                                   userProtectedCounter: params?.getArg(.userProtectedCounter),
-                                   cardId: params?.getArg(.cardId),
-                                   initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
-                                    self?.handleResult(result, callbackId: command.callbackId)
-        }
-    }
-
-    @available(iOS 13.0, *)
-    @objc(runJSONRPCRequest:) func runJSONRPCRequest(command: CDVInvokedUrlCommand) {
+        
         let params = command.params
         guard let request: String = params?.getArg(.JSONRPCRequest) else {
             handleMissingArgs(callbackId: command.callbackId)
@@ -114,12 +25,18 @@ import TangemSdk
 
         sdk.startSession(with: request,
                          cardId: params?.getArg(.cardId),
-                         initialMessage: params?.getArg(.initialMessage)) {[weak self] result in
+                         initialMessage: params?.getArg(.initialMessage),
+                         accessCode: params?.getArg(.accessCode)) {[weak self] result in
                            self?.handleJSONRPCResult(result, callbackId: command.callbackId)
         }
-
     }
 
+    private func handleOldIOS(callbackId: String) {
+        let oldIOSMessage = PluginError(code: 9998, localizedDescription: "TangemSDK does not support this version of iOS")
+        let errorResult = CDVPluginResult(status: .error, messageAs: oldIOSMessage.jsonDescription)
+        commandDelegate.send(errorResult, callbackId: callbackId)
+    }
+    
     private func handleMissingArgs(callbackId: String) {
         let missingArgsError = PluginError(code: 9999, localizedDescription: "Some arguments are missing or wrong")
         let errorResult = CDVPluginResult(status: .error, messageAs:  missingArgsError.jsonDescription)
@@ -128,18 +45,6 @@ import TangemSdk
 
     private func handleJSONRPCResult(_ result: String, callbackId: String) {
         let cdvresult: CDVPluginResult = CDVPluginResult(status: .ok, messageAs: result)
-        commandDelegate.send(cdvresult, callbackId: callbackId)
-    }
-
-    @available(iOS 13.0, *)
-    private func handleResult<TResult: JSONStringConvertible>(_ result: Result<TResult, TangemSdkError>, callbackId: String) {
-        var cdvresult: CDVPluginResult
-        switch result {
-        case .success(let response):
-            cdvresult = CDVPluginResult(status: .ok)
-        case .failure(let error):
-            cdvresult = CDVPluginResult(status: .error, messageAs: error.toPluginError().jsonDescription)
-        }
         commandDelegate.send(cdvresult, callbackId: callbackId)
     }
 }
@@ -169,6 +74,7 @@ fileprivate enum ArgKey: String {
     case cardConfig
     case pinCode
     case initialMessage
+    case accessCode
     case startingSignature
     case finalizingSignature
     case online
@@ -203,7 +109,6 @@ fileprivate extension Dictionary where Key == String, Value == Any {
         }
     }
 
-    @available(iOS 13.0, *)
     private func decodeObject<T: Decodable>(_ value: Any) -> T? {
         if let json = value as? String, let jsonData = json.data(using: .utf8) {
             do {

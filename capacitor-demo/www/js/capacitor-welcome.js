@@ -101,7 +101,7 @@ window.customElements.define('capacitor-welcome', class extends HTMLElement {
 		self.shadowRoot.querySelector('#sign')
 			.addEventListener('click', async function (e) {
 				TangemSdk.sign(
-					["44617461207573656420666f722068617368696e67", "44617461207573656420666f722068617368696e67"],
+					["f1642bb080e1f320924dde7238c1c5f8f1642bb080e1f320924dde7238c1c5f8ff", "f1642bb080e1f320924dde7238c1c5f8f1642bb080e1f320924dde7238c1c5f8ff"],
 					walletPublicKey,
           undefined,
 					cardId,
