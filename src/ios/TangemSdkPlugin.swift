@@ -36,17 +36,6 @@ import TangemSdk
         let cdvresult: CDVPluginResult = CDVPluginResult(status: .ok, messageAs: result)
         commandDelegate.send(cdvresult, callbackId: callbackId)
     }
-
-    private func handleResult<TResult: JSONStringConvertible>(_ result: Result<TResult, TangemSdkError>, callbackId: String) {
-        var cdvresult: CDVPluginResult
-        switch result {
-        case .success(let response):
-            cdvresult = CDVPluginResult(status: .ok)
-        case .failure(let error):
-            cdvresult = CDVPluginResult(status: .error, messageAs: error.toPluginError().jsonDescription)
-        }
-        commandDelegate.send(cdvresult, callbackId: callbackId)
-    }
 }
 
 fileprivate extension CDVInvokedUrlCommand {
