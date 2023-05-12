@@ -33,6 +33,7 @@ var app = {
         document.getElementById('app').setAttribute('style', 'display:block;');
 
         document.getElementById('buttonScanCard').addEventListener('click', onScanCard);
+        document.getElementById('buttonAttestCardKey').addEventListener('click', onAttestCardKey);
         document.getElementById('buttonSignHash').addEventListener('click', onSignHash);
         document.getElementById('buttonSignHashes').addEventListener('click', onSignHashes);
         document.getElementById('buttonCreateWallet').addEventListener('click', onCreateWallet);
@@ -107,6 +108,13 @@ var app = {
             });
         }
 
+        function onAttestCardKey() {
+            var challenge = getElementValue('challenge');
+            var cardId = getElementValue('attestCardId');
+
+            TangemSdk.attestCardKey(challenge, cardId, undefined, callback('taAttestCardKey'));
+        }
+
         function onSignHash() {
             var hash = getElementValue('hash');
             var walletPublicKey = getElementValue('signHashWalletPublicKey');
@@ -154,9 +162,9 @@ var app = {
             TangemSdk.setPassCode(passCode, undefined, undefined, callback('taSetPassCode'));
         }
 
-                function onResetUserCodes() {
-                    TangemSdk.resetUserCodes(undefined, undefined, callback('taResetUserCodes'));
-                }
+        function onResetUserCodes() {
+            TangemSdk.resetUserCodes(undefined, undefined, callback('taResetUserCodes'));
+        }
 
         function onReadFiles() {
             var readPrivateFiles = document.getElementById('ReadPrivateFiles').checked;
@@ -188,10 +196,10 @@ var app = {
             TangemSdk.changeFilesSettings(changes, undefined, undefined, callback('taChangeFilesSettings'));
         }
 
-                function onJsonRPCRequest() {
-                    var request = JSON.parse(getElementValue('taJsonRPCRequest'));
-                    TangemSdk.runJSONRPCRequest(request, undefined, undefined, undefined, callback('taJsonRPCResponse'))
-                }
+        function onJsonRPCRequest() {
+            var request = JSON.parse(getElementValue('taJsonRPCRequest'));
+            TangemSdk.runJSONRPCRequest(request, undefined, undefined, undefined, callback('taJsonRPCResponse'))
+        }
     }
 };
 

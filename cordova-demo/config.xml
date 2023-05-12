@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.tangem.sdk.cordova" version="1.0.0" xmlns="http://www.w3.org/ns/widgets">
+<widget xmlns:android="http://schemas.android.com/apk/res/android" id="com.tangem.sdk.cordova" version="1.0.0"
+        xmlns="http://www.w3.org/ns/widgets">
     <name>tangem-cordova</name>
     <description>
         A sample Apache Cordova application that responds to the deviceready event.
@@ -18,7 +19,13 @@
     <platform name="android">
         <allow-intent href="market:*" />
         <preference name="android-minSdkVersion" value="22" />
+        <preference name="android-targetSdkVersion" value="32" />
+        <preference name="android-compileSdkVersion" value="32" />
+        <preference name="android-buildToolsVersion" value="32.0.0" />
         <preference name="AndroidXEnabled" value="true" />
+        <edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application/activity">
+            <activity android:exported="true" />
+        </edit-config>
     </platform>
     <platform name="ios">
         <allow-intent href="itms:*" />
@@ -26,5 +33,4 @@
         <preference name="deployment-target" value="11.0" />
         <preference name="SwiftVersion" value="5.0" />
     </platform>
-    <plugin name="cordova-plugin-whitelist" spec="1" />
 </widget>

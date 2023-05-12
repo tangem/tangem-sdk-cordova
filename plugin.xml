@@ -23,18 +23,16 @@
             </feature>
         </config-file>
 
-        <config-file mode="overwrite" parent="/*" target="AndroidManifest.xml">
+        <config-file target="AndroidManifest.xml" mode="overwrite" parent="/*">
             <uses-feature android:name="android.hardware.nfc" android:required="true" />
             <uses-permission android:name="android.permission.INTERNET" />
             <uses-permission android:name="android.permission.VIBRATE" />
             <uses-permission android:name="android.permission.NFC" />
-
+            <uses-permission android:name="android.permission.USE_BIOMETRIC" />
         </config-file>
 
-        <edit-config file="AndroidManifest.xml" mode="overwrite"
-                target="/manifest/application/activity[@android:name='MainActivity']">
-
-            <activity android:name="MainActivity" android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
+        <edit-config file="AndroidManifest.xml" mode="overwrite" target="/manifest/application/activity[@android:name='MainActivity']">
+            <activity android:name="MainActivity" android:theme="@style/Theme.App.SplashScreen" />
         </edit-config>
 
     </platform>

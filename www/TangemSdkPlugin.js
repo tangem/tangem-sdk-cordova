@@ -192,6 +192,31 @@ var TangemSdk = {
 		);
 	},
 
+
+
+   /**
+    * To start using any card, you first need to read it using the scanCard() method.
+    * This method launches an NFC session, and once it’s connected with the card,
+    * it obtains the card data. Optionally, if the card contains a wallet (private and public key pair),
+    * it proves that the wallet owns a private key that corresponds to a public one.
+    *
+    * @param challenge Optional challenge. If null, it will be created automatically and returned in command response.
+    * @param cardId CID, Unique Tangem card ID number.
+    * @param initialMessage A custom description that shows at the beginning of the NFC session.
+    * If null, default message will be used.
+    * @param callback is triggered on the completion of the [ScanTask] and provides card response.
+    * in the form of [Card] if the task was performed successfully or [TangemSdkError] in case of an error.
+    */
+    attestCardKey: function (challenge, cardId, initialMessage, callback) {
+    	execJsonRPCRequest(
+    		getJsonRPCRequest('attest_card_key', { challenge: challenge }),
+    		cardId,
+    		initialMessage,
+    		undefined,
+    		callback
+    	);
+    },
+
 	/**
 	 * @typedef {Object} SignHashResponse
 	 * @property {string} cardId Unique Tangem card ID number.
@@ -200,7 +225,7 @@ var TangemSdk = {
 	 */
 
 	/**
-	 * The callback for success scan card.
+	 * The callback for success signHash.
 	 * @callback SignHashCallback
 	 * @param {SignHashCallback} [response] Signed hashes (array of resulting signatures)
 	 * @param {TangemSdkError} [error] Error
@@ -238,7 +263,7 @@ var TangemSdk = {
 	 */
 
 	/**
-	 * The callback for success scan card.
+	 * The callback for success signHashes.
 	 * @callback SignHashCallback
 	 * @param {SignHashCallback} [response] Signed hashes (array of resulting signatures)
 	 * @param {TangemSdkError} [error] Error
