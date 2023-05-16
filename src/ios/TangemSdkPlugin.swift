@@ -45,13 +45,15 @@ import TangemSdk
             return
         }
         
+        let scanTagImage: TangemSdkStyle.ScanTagImage
         if let base64,
-           let data = Data(base64Encoded: base64),
-           let uiImage = UIImage(data: data) {
-            sdk.config.style.nfcTag = .image(uiImage: uiImage, verticalOffset: verticalOffset)
+            let data = Data(base64Encoded: base64),
+            let uiImage = UIImage(data: data) {
+            scanTagImage = .image(uiImage: uiImage, verticalOffset: verticalOffset)
         } else {
-            sdk.config.style.nfcTag = .genericCard
+            scanTagImage = .genericCard
         }
+        sdk.config.style.scanTagImage = scanTagImage
     }
 
     private func handleOldIOS(callbackId: String) {
