@@ -43,8 +43,8 @@ import TangemSdk
         
         let scanTagImage: TangemSdkStyle.ScanTagImage
         if let base64,
-            let data = Data(base64Encoded: base64),
-            let uiImage = UIImage(data: data) {
+           let data = Data(base64Encoded: base64),
+           let uiImage = UIImage(data: data) {
             let verticalOffset: Double = params?.getArg(.verticalOffset) ?? 0
             scanTagImage = .image(uiImage: uiImage, verticalOffset: verticalOffset)
         } else {
