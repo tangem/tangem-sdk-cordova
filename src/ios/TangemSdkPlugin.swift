@@ -30,6 +30,28 @@ import TangemSdk
                            self?.handleJSONRPCResult(result, callbackId: command.callbackId)
         }
     }
+    
+    @objc(setScanImage:) func setScanImage(command: CDVInvokedUrlCommand) {
+        guard #available(iOS 13, *) else {
+            handleOldIOS(callbackId: command.callbackId)
+            return
+        }
+        
+        let params = command.params
+        
+        let base64: String? = params?.getArg(.base64)
+        
+        let scanTagImage: TangemSdkStyle.ScanTagImage
+        if let base64,
+           let data = Data(base64Encoded: base64),
+           let uiImage = UIImage(data: data) {
+            let verticalOffset: Double = params?.getArg(.verticalOffset) ?? 0
+            scanTagImage = .image(uiImage: uiImage, verticalOffset: verticalOffset)
+        } else {
+            scanTagImage = .genericCard
+        }
+        sdk.config.style.scanTagImage = scanTagImage
+    }
 
     private func handleOldIOS(callbackId: String) {
         let oldIOSMessage = PluginError(code: 9998, localizedDescription: "TangemSDK does not support this version of iOS")
@@ -85,6 +107,8 @@ fileprivate enum ArgKey: String {
     case walletPublicKey
     case config
     case JSONRPCRequest
+    case base64
+    case verticalOffset
 }
 
 @available(iOS 13.0, *)
