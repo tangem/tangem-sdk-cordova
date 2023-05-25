@@ -192,7 +192,9 @@ var TangemSdk = {
 		);
 	},
 
-
+    setScanImage: function (params, callback) {
+    	execCommand("setScanImage", params, callback);
+    },
 
    /**
     * To start using any card, you first need to read it using the scanCard() method.
@@ -611,6 +613,32 @@ function execJsonRPCRequest(jsonRPCRequest, cardId, initialMessage, accessCode, 
 			initialMessage: JSON.stringify(initialMessage),
 			accessCode: accessCode
 		},
+		function (response, error) {
+			if (response && response.result) {
+				return callback(response.result);
+			}
+			if (error) {
+				return callback(undefined, error);
+			}
+			if (response.error) {
+				return callback(undefined, response.error);
+			}
+			return callback(undefined, { code: 0, localizedDescription: 'Unknown error' });
+		},
+	);
+}
+
+/**
+ * Execute execCommand
+ *
+ * @param {string} [commandName] name of the command
+ * @param {Object} [params] parameters to be sent with command
+ * @param {CommonCallback} [callback] Callback
+ */
+function execCommand(commandName, params, callback) {
+	exec(
+		commandName,
+		params,
 		function (response, error) {
 			if (response && response.result) {
 				return callback(response.result);

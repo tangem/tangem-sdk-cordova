@@ -1,13 +1,14 @@
 package tangem_sdk;
 
 import android.os.Handler;
-import android.os.Looper;
+import android.util.Base64;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.tangem.TangemSdk;
 import com.tangem.common.biometric.BiometricManager;
 import com.tangem.common.core.Config;
+import com.tangem.common.core.ScanTagImage;
 import com.tangem.common.json.MoshiJsonConverter;
 import com.tangem.common.services.secure.SecureStorage;
 import com.tangem.crypto.bip39.Wordlist;
@@ -86,6 +87,9 @@ public class TangemSdkPlugin extends CordovaPlugin {
                 runJSONRPCRequest(callbackContext, args);
                 return true;
             }
+            case "setScanImage": {
+                setScanImage(callbackContext, args);
+            }
         }
         return false;
     }
@@ -102,6 +106,27 @@ public class TangemSdkPlugin extends CordovaPlugin {
                         callbackContext.success(completionResult);
                         return null;
                     });
+        } catch (Exception ex) {
+            MoshiJsonConverter converter = MoshiJsonConverter.Companion.getINSTANCE();
+            callbackContext.error(converter.prettyPrint(ex, "  "));
+        }
+    }
+
+    private void setScanImage(CallbackContext callbackContext, JSONArray args) {
+        try {
+            if (args.length() == 0 || args.get(0) == null) {
+                sdk.setScanImage(ScanTagImage.GenericCard.INSTANCE);
+                callbackContext.success();
+            } else {
+                JSONObject jsO = (JSONObject) args.get(0);
+                String base64String = jsO.getString("base64");
+                int verticalOffset = jsO.optInt("verticalOffset", 0);
+
+                byte[] base64Image = Base64.decode(base64String, Base64.DEFAULT);
+                ScanTagImage scanTagImage = new ScanTagImage.Image(base64Image, verticalOffset);
+                sdk.setScanImage(scanTagImage);
+                callbackContext.success();
+            }
         } catch (Exception ex) {
             MoshiJsonConverter converter = MoshiJsonConverter.Companion.getINSTANCE();
             callbackContext.error(converter.prettyPrint(ex, "  "));

@@ -1,221 +1,231 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
-        <meta name="format-detection" content="telephone=no">
-        <meta name="msapplication-tap-highlight" content="no">
-        <meta name="viewport" content="initial-scale=1,  width=device-width, viewport-fit=cover, minimum-scale=1, maximum-scale=1">
-        <link rel="stylesheet" type="text/css" href="css/index.css">
-        <title>Tangem Cordova</title>
-    </head>
-    <body>
-        <div id="splashScreen">
-            <h1>Tangem Cordova</h1>
-        </div>
-        <div id="app" style="display:block">
-            <section>
-                <h2>Scan Card</h2>
-                <form class="request">
-                    <label for="messageHeader">Header</label>
-                    <input type="text" id="messageHeader" value="Header of message"/>
-                    <label for="messageBody">Body</label>
-                    <input type="text" class="" id="messageBody" value="Body of message"/>
-                </form>
-                <form class="response">
-                    <label for="taScanCard">Response:</label>
-                    <textarea id="taScanCard"></textarea>
-                </form>
-                <button id="buttonScanCard" type="button">Scan Card</button>
-            </section>
+<head>
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="initial-scale=1,  width=device-width, viewport-fit=cover, minimum-scale=1, maximum-scale=1">
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <title>Tangem Cordova</title>
+</head>
+<body>
+<div id="splashScreen">
+    <h1>Tangem Cordova</h1>
+</div>
+<div id="app" style="display:block">
+    <section>
+        <h2>Scan Card</h2>
+        <form class="request">
+            <label for="messageHeader">Header</label>
+            <input type="text" id="messageHeader" value="Header of message"/>
+            <label for="messageBody">Body</label>
+            <input type="text" class="" id="messageBody" value="Body of message"/>
+        </form>
+        <form class="response">
+            <label for="taScanCard">Response:</label>
+            <textarea id="taScanCard"></textarea>
+        </form>
+        <button id="buttonScanCard" type="button">Scan Card</button>
+    </section>
 
-          <section>
-            <h2>Attest Card key</h2>
-            <form class="request">
-              <label for="challenge">Challenge</label>
-              <input type="text" class="challenge" id="challenge" value="178C1A8B568D9D584E6359B448D34474"/>
-              <label for="attestCardId">Card Id</label>
-              <input type="text" class="cardId" id="attestCardId"/>
-            </form>
-            <form class="response">
-              <label for="taAttestCardKey">Response:</label>
-              <textarea id="taAttestCardKey"></textarea>
-            </form>
-            <button id="buttonAttestCardKey" type="button">Attest Card key</button>
-          </section>
+    <section>
+        <h2>Set scan image</h2>
+        <form class="response">
+            <label for="taSetScanImage">Response:</label>
+            <textarea id="taSetScanImage"></textarea>
+        </form>
+        <button id="buttonSetScanImage" type="button">Set scan image</button>
+    </section>
 
-            <section>
-                <h2>Sign Hash</h2>
-                <form class="request">
-                    <label for="hash">Hash</label>
-                    <input type="text" id="hash" value="f1642bb080e1f320924dde7238c1c5f8f1642bb080e1f320924dde7238c1c5f8ff"/>
-                    <label for="signHashWalletPublicKey">Wallet Public Key</label>
-                    <input type="text" class="walletPublicKey" id="signHashWalletPublicKey"/>
-                    <label for="signHashCardId">Card Id</label>
-                    <input type="text" class="cardId" id="signHashCardId"/>
-                </form>
-                <form class="response">
-                    <label for="taSignHash">Response:</label>
-                    <textarea id="taSignHash"></textarea>
-                </form>
-                <button id="buttonSignHash" type="button">Sign</button>
-            </section>
+    <section>
+        <h2>Attest Card key</h2>
+        <form class="request">
+            <label for="challenge">Challenge</label>
+            <input type="text" class="challenge" id="challenge" value="178C1A8B568D9D584E6359B448D34474"/>
+            <label for="attestCardId">Card Id</label>
+            <input type="text" class="cardId" id="attestCardId"/>
+        </form>
+        <form class="response">
+            <label for="taAttestCardKey">Response:</label>
+            <textarea id="taAttestCardKey"></textarea>
+        </form>
+        <button id="buttonAttestCardKey" type="button">Attest Card key</button>
+    </section>
 
-            <section>
-                <h2>Sign Hashes</h2>
-                <form class="request">
-                    <label for="hash1">Hash 1</label>
-                    <input type="text" id="hash1" value="f1642bb080e1f320924dde7238c1c5f8f1642bb080e1f320924dde7238c1c5f8ff"/>
-                    <label for="hash2">Hash 2</label>
-                    <input type="text" id="hash2" value="f1642bb080e1f320924dde7238c1c5f8f1642bb080e1f320924dde7238c1c5f8ff"/>
-                    <label for="hash3">Hash 3</label>
-                    <input type="text" id="hash3"/>
-                    <label for="signHashesWalletPublicKey">Wallet Public Key</label>
-                    <input type="text" class="walletPublicKey" id="signHashesWalletPublicKey"/>
-                    <label for="signHashesCardId">Card Id</label>
-                    <input type="text" class="cardId" id="signHashesCardId"/>
-                </form>
-                <form class="response">
-                    <label for="taSignHashes">Response:</label>
-                    <textarea id="taSignHashes"></textarea>
-                </form>
-                <button id="buttonSignHashes" type="button">Sign</button>
-            </section>
+    <section>
+        <h2>Sign Hash</h2>
+        <form class="request">
+            <label for="hash">Hash</label>
+            <input type="text" id="hash" value="f1642bb080e1f320924dde7238c1c5f8f1642bb080e1f320924dde7238c1c5f8ff"/>
+            <label for="signHashWalletPublicKey">Wallet Public Key</label>
+            <input type="text" class="walletPublicKey" id="signHashWalletPublicKey"/>
+            <label for="signHashCardId">Card Id</label>
+            <input type="text" class="cardId" id="signHashCardId"/>
+        </form>
+        <form class="response">
+            <label for="taSignHash">Response:</label>
+            <textarea id="taSignHash"></textarea>
+        </form>
+        <button id="buttonSignHash" type="button">Sign</button>
+    </section>
 
-            <section>
-                <h2>Create Wallet</h2>
-                <form class="request">
-                    <label>Elliptic curve
-                        <select id="createWalletEllipticCurve">
-                        </select>
-                    </label>
-                    <label for="createWalletCardId">Card Id</label>
-                    <input type="text" class="cardId" id="createWalletCardId"/>
-                </form>
-                <form class="response">
-                    <label for="taCreateWallet">Response:</label>
-                    <textarea id="taCreateWallet"></textarea>
-                </form>
-                <button id="buttonCreateWallet" type="button">Create Wallet</button>
-            </section>
+    <section>
+        <h2>Sign Hashes</h2>
+        <form class="request">
+            <label for="hash1">Hash 1</label>
+            <input type="text" id="hash1" value="f1642bb080e1f320924dde7238c1c5f8f1642bb080e1f320924dde7238c1c5f8ff"/>
+            <label for="hash2">Hash 2</label>
+            <input type="text" id="hash2" value="f1642bb080e1f320924dde7238c1c5f8f1642bb080e1f320924dde7238c1c5f8ff"/>
+            <label for="hash3">Hash 3</label>
+            <input type="text" id="hash3"/>
+            <label for="signHashesWalletPublicKey">Wallet Public Key</label>
+            <input type="text" class="walletPublicKey" id="signHashesWalletPublicKey"/>
+            <label for="signHashesCardId">Card Id</label>
+            <input type="text" class="cardId" id="signHashesCardId"/>
+        </form>
+        <form class="response">
+            <label for="taSignHashes">Response:</label>
+            <textarea id="taSignHashes"></textarea>
+        </form>
+        <button id="buttonSignHashes" type="button">Sign</button>
+    </section>
 
-            <section>
-                <h2>Purge Wallet</h2>
-                <form class="request">
-                    <label for="purgeWalletPublicKey">WalletPublicKey</label>
-                    <input type="text" class="walletPublicKey" id="purgeWalletPublicKey"/>
-                </form>
-                <form class="response">
-                    <label for="taPurgeWallet">Response:</label>
-                    <textarea id="taPurgeWallet"></textarea>
-                </form>
-                <button id="buttonPurgeWallet" type="button">Purge Wallet</button>
-            </section>
+    <section>
+        <h2>Create Wallet</h2>
+        <form class="request">
+            <label>Elliptic curve
+                <select id="createWalletEllipticCurve">
+                </select>
+            </label>
+            <label for="createWalletCardId">Card Id</label>
+            <input type="text" class="cardId" id="createWalletCardId"/>
+        </form>
+        <form class="response">
+            <label for="taCreateWallet">Response:</label>
+            <textarea id="taCreateWallet"></textarea>
+        </form>
+        <button id="buttonCreateWallet" type="button">Create Wallet</button>
+    </section>
 
-            <section>
-                <h2>Set AccessCode</h2>
-                <form class="request">
-                    <label for="accessCode">AccessCode</label>
-                    <input type="text" id="accessCode" value=""/>
-                </form>
-                <form class="response">
-                    <label for="taSetAccessCode">Response:</label>
-                    <textarea id="taSetAccessCode"></textarea>
-                </form>
-                <button id="buttonSetAccessCode" type="button">Set AccessCode</button>
-            </section>
+    <section>
+        <h2>Purge Wallet</h2>
+        <form class="request">
+            <label for="purgeWalletPublicKey">WalletPublicKey</label>
+            <input type="text" class="walletPublicKey" id="purgeWalletPublicKey"/>
+        </form>
+        <form class="response">
+            <label for="taPurgeWallet">Response:</label>
+            <textarea id="taPurgeWallet"></textarea>
+        </form>
+        <button id="buttonPurgeWallet" type="button">Purge Wallet</button>
+    </section>
 
-            <section>
-                <h2>Set PassCode</h2>
-                <form class="request">
-                    <label for="passCode">PassCode</label>
-                    <input type="text" id="passCode" value=""/>
-                </form>
-                <form class="response">
-                    <label for="taSetPassCode">Response:</label>
-                    <textarea id="taSetPassCode"></textarea>
-                </form>
-                <button id="buttonSetPassCode" type="button">Set PassCode</button>
-            </section>
+    <section>
+        <h2>Set AccessCode</h2>
+        <form class="request">
+            <label for="accessCode">AccessCode</label>
+            <input type="text" id="accessCode" value=""/>
+        </form>
+        <form class="response">
+            <label for="taSetAccessCode">Response:</label>
+            <textarea id="taSetAccessCode"></textarea>
+        </form>
+        <button id="buttonSetAccessCode" type="button">Set AccessCode</button>
+    </section>
 
-            <section>
-                <h2>Reset User Codes</h2>
-                <form class="response">
-                    <label for="taResetUserCodes">Response:</label>
-                    <textarea id="taResetUserCodes"></textarea>
-                </form>
-                <button id="buttonResetUserCodes" type="button">Reset User Codes</button>
-            </section>
+    <section>
+        <h2>Set PassCode</h2>
+        <form class="request">
+            <label for="passCode">PassCode</label>
+            <input type="text" id="passCode" value=""/>
+        </form>
+        <form class="response">
+            <label for="taSetPassCode">Response:</label>
+            <textarea id="taSetPassCode"></textarea>
+        </form>
+        <button id="buttonSetPassCode" type="button">Set PassCode</button>
+    </section>
 
-            <section>
-                <h2>Read files</h2>
-                <form class="request">
-                    <label>Read private files
-                        <input type="checkbox" id="ReadPrivateFiles" checked value="read private files">
-                    </label>
-                </form>
-                <form class="response">
-                    <label for="taReadFiles">Response:</label>
-                    <textarea id="taReadFiles"></textarea>
-                </form>
-                <button id="buttonReadFiles" type="button">Read files</button>
-            </section>
+    <section>
+        <h2>Reset User Codes</h2>
+        <form class="response">
+            <label for="taResetUserCodes">Response:</label>
+            <textarea id="taResetUserCodes"></textarea>
+        </form>
+        <button id="buttonResetUserCodes" type="button">Reset User Codes</button>
+    </section>
 
-            <section>
-                <h2>Write files</h2>
-                <form class="request">
+    <section>
+        <h2>Read files</h2>
+        <form class="request">
+            <label>Read private files
+                <input type="checkbox" id="ReadPrivateFiles" checked value="read private files">
+            </label>
+        </form>
+        <form class="response">
+            <label for="taReadFiles">Response:</label>
+            <textarea id="taReadFiles"></textarea>
+        </form>
+        <button id="buttonReadFiles" type="button">Read files</button>
+    </section>
 
-                </form>
-                <form class="response">
-                    <label for="taWriteFiles">Response:</label>
-                    <textarea id="taWriteFiles"></textarea>
-                </form>
-                <button id="buttonWriteFiles" type="button">Write files</button>
-            </section>
+    <section>
+        <h2>Write files</h2>
+        <form class="request">
 
-            <section>
-                <h2>Delete files</h2>
-                <form class="request">
-                    <label for="DeleteFileIndex">Delete file index</label>
-                    <input type="number" id="DeleteFileIndex" value="0"/>
-                </form>
-                <form class="response">
-                    <label for="taDeleteFiles">Response:</label>
-                    <textarea id="taDeleteFiles"></textarea>
-                </form>
-                <button id="buttonDeleteFiles" type="button">Delete files</button>
-            </section>
+        </form>
+        <form class="response">
+            <label for="taWriteFiles">Response:</label>
+            <textarea id="taWriteFiles"></textarea>
+        </form>
+        <button id="buttonWriteFiles" type="button">Write files</button>
+    </section>
 
-            <section>
-                <h2>Change files settings</h2>
-                <form class="request">
-                    <label for="ChangeFileIndex">Delete file index</label>
-                    <input type="number" id="ChangeFileIndex" value="0"/>
-                    <label>Read private files
-                        <input type="checkbox" id="ChangeFilePrivate" checked value="Private">
-                    </label>
-                </form>
-                <form class="response">
-                    <label for="taChangeFilesSettings">Response:</label>
-                    <textarea id="taChangeFilesSettings"></textarea>
-                </form>
-                <button id="buttonChangeFilesSettings" type="button">Files change settings</button>
-            </section>
+    <section>
+        <h2>Delete files</h2>
+        <form class="request">
+            <label for="DeleteFileIndex">Delete file index</label>
+            <input type="number" id="DeleteFileIndex" value="0"/>
+        </form>
+        <form class="response">
+            <label for="taDeleteFiles">Response:</label>
+            <textarea id="taDeleteFiles"></textarea>
+        </form>
+        <button id="buttonDeleteFiles" type="button">Delete files</button>
+    </section>
 
-            <section>
-                <h2>run JsonRPC</h2>
-                <form class="request">
-                    <label for="taJsonRPCRequest">Request:</label>
-                    <textarea id="taJsonRPCRequest">{ "jsonrpc": "2.0", "id": 1, "method": "scan" }</textarea>
-                </form>
-                <form class="response">
-                    <label for="taJsonRPCResponse">Response:</label>
-                    <textarea id="taJsonRPCResponse"></textarea>
-                </form>
-                <button id="buttonJsonRPCRequest" type="button">Run JsonRPC</button>
-            </section>
+    <section>
+        <h2>Change files settings</h2>
+        <form class="request">
+            <label for="ChangeFileIndex">Delete file index</label>
+            <input type="number" id="ChangeFileIndex" value="0"/>
+            <label>Read private files
+                <input type="checkbox" id="ChangeFilePrivate" checked value="Private">
+            </label>
+        </form>
+        <form class="response">
+            <label for="taChangeFilesSettings">Response:</label>
+            <textarea id="taChangeFilesSettings"></textarea>
+        </form>
+        <button id="buttonChangeFilesSettings" type="button">Files change settings</button>
+    </section>
 
-        </div>
-        <script type="text/javascript" src="cordova.js"></script>
-        <script type="text/javascript" src="js/index.js"></script>
-    </body>
+    <section>
+        <h2>run JsonRPC</h2>
+        <form class="request">
+            <label for="taJsonRPCRequest">Request:</label>
+            <textarea id="taJsonRPCRequest">{ "jsonrpc": "2.0", "id": 1, "method": "scan" }</textarea>
+        </form>
+        <form class="response">
+            <label for="taJsonRPCResponse">Response:</label>
+            <textarea id="taJsonRPCResponse"></textarea>
+        </form>
+        <button id="buttonJsonRPCRequest" type="button">Run JsonRPC</button>
+    </section>
+
+</div>
+<script type="text/javascript" src="cordova.js"></script>
+<script type="text/javascript" src="js/index.js"></script>
+</body>
 </html>
