@@ -89,6 +89,7 @@ public class TangemSdkPlugin extends CordovaPlugin {
             }
             case "setScanImage": {
                 setScanImage(callbackContext, args);
+                return true;
             }
         }
         return false;
